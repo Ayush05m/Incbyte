@@ -29,6 +29,7 @@ export const RegisterForm: React.FC = () => {
     setError,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onBlur',
   });
 
   const onSubmit = async (data: RegisterFormData) => {

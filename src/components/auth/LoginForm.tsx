@@ -30,6 +30,7 @@ export const LoginForm: React.FC = () => {
     setError,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
   });
 
   const [isDemoSubmitting, setIsDemoSubmitting] = React.useState(false);
