@@ -32,6 +32,8 @@ export const LoginForm: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  const [isDemoSubmitting, setIsDemoSubmitting] = React.useState(false);
+
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await authService.login(data.email, data.password);
@@ -45,41 +47,80 @@ export const LoginForm: React.FC = () => {
     }
   };
 
+  const handleDemoLogin = async () => {
+    setIsDemoSubmitting(true);
+    try {
+      const response = await authService.login('demo@example.com', 'password');
+      login(response.user, response.token);
+      toast.success("Logged in as Demo User!");
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Demo login failed. Please try again.';
+      setError('root', { message });
+      toast.error(message);
+    } finally {
+      setIsDemoSubmitting(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          {...register('email')}
-          placeholder="user@example.com"
-        />
-        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            {...register('email')}
+            placeholder="user@example.com"
+          />
+          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+        </div>
+        
+        <div>
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            {...register('password')}
+            placeholder="••••••••"
+          />
+          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+        </div>
+        
+        {errors.root && (
+          <div className="text-red-500 text-sm">{errors.root.message}</div>
+        )}
+        
+        <Button
+          type="submit"
+          disabled={isSubmitting || isDemoSubmitting}
+          className="w-full"
+        >
+          {isSubmitting ? 'Signing In...' : 'Sign In'}
+        </Button>
+      </form>
+
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-card px-2 text-muted-foreground">
+            Or
+          </span>
+        </div>
       </div>
-      
-      <div>
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          {...register('password')}
-          placeholder="••••••••"
-        />
-        {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
-      </div>
-      
-      {errors.root && (
-        <div className="text-red-500 text-sm">{errors.root.message}</div>
-      )}
-      
+
       <Button
-        type="submit"
-        disabled={isSubmitting}
+        type="button"
+        variant="outline"
+        onClick={handleDemoLogin}
+        disabled={isSubmitting || isDemoSubmitting}
         className="w-full"
       >
-        {isSubmitting ? 'Signing In...' : 'Sign In'}
+        {isDemoSubmitting ? 'Logging in...' : 'Login as Demo User'}
       </Button>
-    </form>
+    </>
   );
 };
