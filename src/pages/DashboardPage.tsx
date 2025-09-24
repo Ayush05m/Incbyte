@@ -20,9 +20,9 @@ const DashboardPage: React.FC = () => {
   const [editingSweet, setEditingSweet] = useState<Sweet | null>(null);
   const [sweetToDelete, setSweetToDelete] = useState<Sweet | null>(null);
 
-  const { data: sweets, isLoading, error, refetch } = useSweets(search_params);
+  const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
   const purchaseMutation = usePurchaseSweet();
-  const updateQuantityMutation = useUpdateSweetQuantity(search_params);
+  const updateQuantityMutation = useUpdateSweetQuantity(searchParams);
   const addSweetMutation = useAddSweet();
   const updateSweetMutation = useUpdateSweet();
   const deleteSweetMutation = useDeleteSweet();
@@ -86,7 +86,7 @@ const DashboardPage: React.FC = () => {
   };
 
   const isMutating = purchaseMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending;
-  const isFiltered = Object.keys(search_params).length > 0;
+  const isFiltered = Object.keys(searchParams).length > 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
