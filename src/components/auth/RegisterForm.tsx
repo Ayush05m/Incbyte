@@ -38,8 +38,14 @@ export const RegisterForm: React.FC = () => {
       toast.success("Registration successful!");
       navigate('/dashboard');
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Registration failed. Please try again.';
-      setError('root', { message });
+      let message = 'Registration failed. Please try again.';
+      if (error.response?.status === 409) {
+        message = error.response.data?.message || 'This email is already registered.';
+        setError('email', { type: 'manual', message });
+      } else {
+        message = error.response?.data?.message || message;
+        setError('root', { message });
+      }
       toast.error(message);
     }
   };

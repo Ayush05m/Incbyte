@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, PersistStorage } from 'zustand/middleware';
 import { User } from '@/types/auth.types';
 
 interface AuthState {
@@ -9,6 +9,25 @@ interface AuthState {
   login: (user: User, token: string) => void;
   logout: () => void;
 }
+
+const storage: PersistStorage<AuthState> = {
+  getItem: (name) => {
+    const str = localStorage.getItem(name);
+    if (!str) return null;
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      console.error("Failed to parse auth storage, the data might be corrupted:", e);
+      return null;
+    }
+  },
+  setItem: (name, value) => {
+    localStorage.setItem(name, JSON.stringify(value));
+  },
+  removeItem: (name) => {
+    localStorage.removeItem(name);
+  },
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -20,12 +39,18 @@ export const useAuthStore = create<AuthState>()(
         set({ user, token, isAuthenticated: true }),
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false });
-        // Optionally, redirect to login page
-        // window.location.href = '/login';
+        // Redirect to login page after logout for security
+        window.location.href = '/login';
       },
     }),
     {
-      name: 'auth-storage', // unique name
+      name: 'auth-storage',
+      storage: storage,
+      onRehydrateError: (err) => {
+        console.error("Failed to rehydrate auth state, logging out.", err);
+        // If rehydration fails, it's safest to log out to prevent app crashes.
+        useAuthStore.getState().logout();
+      },
     }
   )
 );

@@ -41,7 +41,7 @@ export const LoginForm: React.FC = () => {
       toast.success("Login successful!");
       navigate(from, { replace: true });
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      const message = error.response?.data?.message || 'Login failed. Please check your connection and try again.';
       setError('root', { message });
       toast.error(message);
     }
