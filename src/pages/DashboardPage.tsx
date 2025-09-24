@@ -23,19 +23,22 @@ const DashboardPage: React.FC = () => {
 
   const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
   const purchaseMutation = usePurchaseSweet();
-  const updateQuantityMutation = useUpdateSweetQuantity();
+  const updateQuantityMutation = useUpdateSweetQuantity(searchParams);
   const addSweetMutation = useAddSweet();
   const updateSweetMutation = useUpdateSweet();
   const deleteSweetMutation = useDeleteSweet();
 
   const handleSearch = (params: SearchParams) => setSearchParams(params);
+  
   const handlePurchase = async (sweetId: number) => {
+    const sweet = sweets?.find(s => s.id === sweetId);
     toast.promise(purchaseMutation.mutateAsync({ sweetId, quantity: 1 }), {
       loading: 'Processing purchase...',
-      success: 'Purchase successful!',
+      success: `Successfully purchased ${sweet?.name || 'a sweet'}!`,
       error: (err: any) => err?.response?.data?.message || 'Purchase failed. Please try again.',
     });
   };
+
   const handleUpdateQuantity = (sweetId: number, newQuantity: number) => {
     updateQuantityMutation.mutate({ sweetId, newQuantity });
   };
@@ -52,7 +55,6 @@ const DashboardPage: React.FC = () => {
 
   const handleFormSubmit = async (data: CreateSweetDto | UpdateSweetDto) => {
     if (!editingSweet) {
-      // This is a new sweet
       const action = addSweetMutation.mutateAsync(data as CreateSweetDto);
       toast.promise(action, {
         loading: 'Adding sweet...',
@@ -61,7 +63,6 @@ const DashboardPage: React.FC = () => {
       });
       action.then(() => setIsFormOpen(false));
     } else {
-      // This is an existing sweet
       const action = updateSweetMutation.mutateAsync({ sweetId: editingSweet.id, sweetData: data });
       toast.promise(action, {
         loading: 'Updating sweet...',
@@ -88,7 +89,7 @@ const DashboardPage: React.FC = () => {
     setDeletingSweetId(null);
   };
 
-  const isMutating = purchaseMutation.isPending || updateQuantityMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending;
+  const isMutating = purchaseMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending;
   const isFiltered = Object.keys(searchParams).length > 0;
 
   return (

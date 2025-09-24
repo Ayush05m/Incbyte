@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sweetsService } from '@/services/sweets.service';
-import { CreateSweetDto, SearchParams, UpdateSweetDto } from '@/types/sweet.types';
+import { CreateSweetDto, SearchParams, Sweet, UpdateSweetDto } from '@/types/sweet.types';
+import { toast } from 'sonner';
 
 export const useSweets = (searchParams?: SearchParams) => {
   return useQuery({
@@ -47,18 +48,42 @@ export const usePurchaseSweet = () => {
     mutationFn: ({ sweetId, quantity }: { sweetId: number; quantity: number }) =>
       sweetsService.purchaseSweet(sweetId, quantity),
     onSuccess: () => {
+      // After a successful purchase, invalidate all sweets queries to refetch and show correct stock.
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
     },
   });
 };
 
-export const useUpdateSweetQuantity = () => {
+export const useUpdateSweetQuantity = (searchParams?: SearchParams) => {
   const queryClient = useQueryClient();
+  const queryKey = ['sweets', searchParams];
+
   return useMutation({
     mutationFn: ({ sweetId, newQuantity }: { sweetId: number; newQuantity: number }) =>
       sweetsService.updateSweetQuantity(sweetId, newQuantity),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sweets'] });
+    
+    onMutate: async ({ sweetId, newQuantity }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousSweets = queryClient.getQueryData<Sweet[]>(queryKey);
+      
+      queryClient.setQueryData<Sweet[]>(queryKey, (old) =>
+        old?.map(sweet => 
+          sweet.id === sweetId ? { ...sweet, quantity: newQuantity } : sweet
+        ) ?? []
+      );
+      
+      return { previousSweets };
+    },
+    
+    onError: (err, variables, context) => {
+      if (context?.previousSweets) {
+        queryClient.setQueryData(queryKey, context.previousSweets);
+      }
+      toast.error('Failed to update quantity. Restoring previous state.');
+    },
+    
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 };
