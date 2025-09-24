@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sweet } from '@/types/sweet.types';
 import { SweetCard } from './SweetCard';
+import { useAuthStore } from '@/store/authStore';
 
 interface SweetGridProps {
   sweets: Sweet[];
@@ -9,11 +10,21 @@ interface SweetGridProps {
   onEdit: (sweet: Sweet) => void;
   onDelete: (sweetId: number) => void;
   isLoading?: boolean;
+  isFiltered: boolean;
 }
 
-export const SweetGrid: React.FC<SweetGridProps> = ({ sweets, onPurchase, onUpdateQuantity, onEdit, onDelete, isLoading }) => {
+export const SweetGrid: React.FC<SweetGridProps> = ({ sweets, onPurchase, onUpdateQuantity, onEdit, onDelete, isLoading, isFiltered }) => {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'admin';
+
   if (sweets.length === 0) {
-    return <p className="text-center text-gray-500 py-10">No sweets match your criteria.</p>;
+    let message = "No sweets available at the moment.";
+    if (isFiltered) {
+      message = "No sweets match your criteria.";
+    } else if (isAdmin) {
+      message = "No sweets available yet. Why not add one?";
+    }
+    return <p className="text-center text-gray-500 py-10">{message}</p>;
   }
 
   return (

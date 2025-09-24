@@ -21,7 +21,7 @@ const DashboardPage: React.FC = () => {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [deletingSweetId, setDeletingSweetId] = useState<number | null>(null);
 
-  const { data: sweets, isLoading, error } = useSweets(searchParams);
+  const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
   const purchaseMutation = usePurchaseSweet();
   const updateQuantityMutation = useUpdateSweetQuantity();
   const addSweetMutation = useAddSweet();
@@ -33,7 +33,7 @@ const DashboardPage: React.FC = () => {
     toast.promise(purchaseMutation.mutateAsync({ sweetId, quantity: 1 }), {
       loading: 'Processing purchase...',
       success: 'Purchase successful!',
-      error: 'Purchase failed. Please try again.',
+      error: (err: any) => err?.response?.data?.message || 'Purchase failed. Please try again.',
     });
   };
   const handleUpdateQuantity = (sweetId: number, newQuantity: number) => {
@@ -89,6 +89,7 @@ const DashboardPage: React.FC = () => {
   };
 
   const isMutating = purchaseMutation.isPending || updateQuantityMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending;
+  const isFiltered = Object.keys(searchParams).length > 0;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -110,8 +111,13 @@ const DashboardPage: React.FC = () => {
       </div>
       
       {isLoading && <LoadingSpinner />}
-      {error && <div className="text-center text-red-500">Error loading sweets. Please try again later.</div>}
-      {sweets && (
+      {error && (
+        <div className="text-center text-red-500 py-10">
+          <p>Error loading sweets. Please try again later.</p>
+          <Button onClick={() => refetch()} className="mt-4">Retry</Button>
+        </div>
+      )}
+      {!isLoading && !error && sweets && (
         <SweetGrid
           sweets={sweets}
           onPurchase={handlePurchase}
@@ -119,6 +125,7 @@ const DashboardPage: React.FC = () => {
           onEdit={handleOpenEditForm}
           onDelete={handleOpenDeleteAlert}
           isLoading={isMutating}
+          isFiltered={isFiltered}
         />
       )}
 

@@ -59,7 +59,18 @@ export const sweetsService = {
 
   purchaseSweet: async (sweetId: number, quantity: number): Promise<{ success: boolean }> => {
     await new Promise(resolve => setTimeout(resolve, 500));
-    console.log(`Purchased ${quantity} of sweet ${sweetId}`);
+    const sweetIndex = mockSweets.findIndex(s => s.id === sweetId);
+    if (sweetIndex === -1) throw new Error("Sweet not found");
+
+    const sweet = mockSweets[sweetIndex];
+    if (sweet.quantity < quantity) {
+      const error: any = new Error('Insufficient stock');
+      error.response = { status: 400, data: { message: 'Not enough items in stock.' } };
+      throw error;
+    }
+
+    mockSweets[sweetIndex].quantity -= quantity;
+    console.log(`Purchased ${quantity} of sweet ${sweetId}. New quantity: ${mockSweets[sweetIndex].quantity}`);
     return { success: true };
   },
 

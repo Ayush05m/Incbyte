@@ -26,7 +26,8 @@ export const SweetCard: React.FC<SweetCardProps> = ({
 }) => {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
-  const isOutOfStock = sweet.quantity === 0;
+  const isOutOfStock = sweet.quantity <= 0;
+  const displayQuantity = Math.max(0, sweet.quantity);
 
   const handleIncrease = () => onUpdateQuantity(sweet.id, sweet.quantity + 1);
   const handleDecrease = () => {
@@ -85,13 +86,13 @@ export const SweetCard: React.FC<SweetCardProps> = ({
       <CardFooter className="flex items-center justify-between">
         <div className="flex items-center text-sm text-gray-500">
           <Package className="w-4 h-4 mr-1" />
-          <span>{sweet.quantity} in stock</span>
+          <span>{displayQuantity} in stock</span>
         </div>
         
         {isAdmin ? (
           <div className="flex items-center gap-2">
-            <Button onClick={handleDecrease} disabled={isLoading || sweet.quantity === 0} size="icon" variant="outline"><Minus className="w-4 h-4" /></Button>
-            <span className="font-semibold w-8 text-center">{sweet.quantity}</span>
+            <Button onClick={handleDecrease} disabled={isLoading || sweet.quantity <= 0} size="icon" variant="outline"><Minus className="w-4 h-4" /></Button>
+            <span className="font-semibold w-8 text-center">{displayQuantity}</span>
             <Button onClick={handleIncrease} disabled={isLoading} size="icon" variant="outline"><Plus className="w-4 h-4" /></Button>
           </div>
         ) : (
