@@ -210,8 +210,8 @@ const DashboardPage: React.FC = () => {
               },
               {
                 title: 'Inventory Value',
-                value: `$${stats.totalValue.toFixed(2)}`,
-                subtitle: `Avg: $${stats.averagePrice.toFixed(2)}`,
+                value: `₹${stats.totalValue.toFixed(2)}`,
+                subtitle: `Avg: ₹${stats.averagePrice.toFixed(2)}`,
                 icon: DollarSign,
                 color: 'green',
                 gradient: 'from-green-500 to-emerald-500'

@@ -104,7 +104,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({
             <div>
               <div className="flex items-start justify-between">
                 <h3 className="font-bold text-lg text-gray-800">{sweet.name}</h3>
-                <span className="text-xl font-bold text-green-600">${sweet.price.toFixed(2)}</span>
+                <span className="text-xl font-bold text-green-600">₹{sweet.price.toFixed(2)}</span>
               </div>
               <Badge className={`mt-1 bg-gradient-to-r ${getCategoryColor(sweet.category)} text-white border-0 w-fit`}>
                 {sweet.category}
@@ -311,7 +311,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({
                 text-xl font-bold transition-all duration-300
                 ${isHovered ? 'text-transparent bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text scale-110' : 'text-green-600'}
               `}>
-                ${sweet.price.toFixed(2)}
+                ₹{sweet.price.toFixed(2)}
               </span>
               {/* Star rating (mockup) */}
               <div className="flex gap-0.5">
@@ -412,7 +412,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({
                 {isLoading ? (
                   <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
                 ) : (
-                  <ShoppingCart className="w-4 h-4" />
+                  <ShoppingCart className="w-4 w-4" />
                 )}
               </Button>
             </div>
