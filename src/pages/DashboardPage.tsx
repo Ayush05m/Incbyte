@@ -18,8 +18,7 @@ const DashboardPage: React.FC = () => {
   const [searchParams, setSearchParams] = useState<SearchParams>({});
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSweet, setEditingSweet] = useState<Sweet | null>(null);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [deletingSweetId, setDeletingSweetId] = useState<number | null>(null);
+  const [sweetToDelete, setSweetToDelete] = useState<Sweet | null>(null);
 
   const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
   const purchaseMutation = usePurchaseSweet();
@@ -74,19 +73,20 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleOpenDeleteAlert = (sweetId: number) => {
-    setDeletingSweetId(sweetId);
-    setIsAlertOpen(true);
+    const sweet = sweets?.find(s => s.id === sweetId);
+    if (sweet) {
+      setSweetToDelete(sweet);
+    }
   };
 
   const handleDeleteConfirm = async () => {
-    if (!deletingSweetId) return;
-    toast.promise(deleteSweetMutation.mutateAsync(deletingSweetId), {
-      loading: 'Deleting sweet...',
-      success: 'Sweet deleted successfully!',
-      error: 'Failed to delete sweet.',
+    if (!sweetToDelete) return;
+    toast.promise(deleteSweetMutation.mutateAsync(sweetToDelete.id), {
+      loading: `Deleting ${sweetToDelete.name}...`,
+      success: `${sweetToDelete.name} deleted successfully!`,
+      error: `Failed to delete ${sweetToDelete.name}.`,
     });
-    setIsAlertOpen(false);
-    setDeletingSweetId(null);
+    setSweetToDelete(null);
   };
 
   const isMutating = purchaseMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending;
@@ -140,17 +140,22 @@ const DashboardPage: React.FC = () => {
         />
       )}
 
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+      <AlertDialog open={!!sweetToDelete} onOpenChange={(open) => !open && setSweetToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Delete "{sweetToDelete?.name}"?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the sweet from the list.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeletingSweetId(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
