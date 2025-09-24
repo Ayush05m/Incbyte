@@ -7,21 +7,22 @@ import { SearchParams, Sweet, CreateSweetDto, UpdateSweetDto } from '@/types/swe
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   PlusCircle, 
+  TrendingUp, 
+  Package, 
+  DollarSign, 
   AlertTriangle,
   RefreshCcw,
+  Filter,
   X,
   Sparkles,
-  Heart,
-  BarChart
+  Heart
 } from 'lucide-react';
 import { SweetFormDialog } from '@/components/sweets/SweetFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { StatsDrawer } from '@/components/dashboard/StatsDrawer';
-import { Package } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -31,9 +32,10 @@ const DashboardPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSweet, setEditingSweet] = useState<Sweet | null>(null);
   const [sweetToDelete, setSweetToDelete] = useState<Sweet | null>(null);
-  const [isStatsDrawerOpen, setIsStatsDrawerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
+  // const purchaseMutation = usePurchaseSweet();
   const updateQuantityMutation = useUpdateSweetQuantity(searchParams);
   const addSweetMutation = useAddSweet();
   const updateSweetMutation = useUpdateSweet();
@@ -47,7 +49,7 @@ const DashboardPage: React.FC = () => {
     const totalValue = sweets.reduce((sum, sweet) => sum + (sweet.price * sweet.quantity), 0);
     const lowStockItems = sweets.filter(sweet => sweet.quantity < 10).length;
     const categories = [...new Set(sweets.map(sweet => sweet.category))].length;
-    const averagePrice = totalSweets > 0 ? sweets.reduce((sum, sweet) => sum + sweet.price, 0) / totalSweets : 0;
+    const averagePrice = sweets.reduce((sum, sweet) => sum + sweet.price, 0) / totalSweets;
 
     return {
       totalSweets,
@@ -59,6 +61,15 @@ const DashboardPage: React.FC = () => {
   }, [sweets]);
 
   const handleSearch = useCallback((params: SearchParams) => setSearchParams(params), []);
+  
+  const handlePurchase = async (sweetId: number, quantity: number) => {
+    const sweet = sweets?.find(s => s.id === sweetId);
+    // toast.promise(purchaseMutation.mutateAsync({ sweetId, quantity }), {
+    //   loading: 'Processing purchase...',
+    //   success: `Successfully purchased ${quantity} of ${sweet?.name || 'a sweet'}!`,
+    //   error: (err: any) => err?.response?.data?.message || 'Purchase failed. Please try again.',
+    // });
+  };
 
   const handleUpdateQuantity = (sweetId: number, newQuantity: number) => {
     toast.promise(updateQuantityMutation.mutateAsync({ sweetId, newQuantity }), {
@@ -116,6 +127,7 @@ const DashboardPage: React.FC = () => {
     toast.success('Filters cleared');
   };
 
+  // const isMutating = purchaseMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending || updateQuantityMutation.isPending;
   const isMutating = addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending || updateQuantityMutation.isPending;
   const isFiltered = Object.keys(searchParams).length > 0;
 
@@ -162,32 +174,118 @@ const DashboardPage: React.FC = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3 animate-slide-in-right">
+            {isFiltered && (
+              <Button 
+                variant="outline" 
+                onClick={clearFilters}
+                className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 border-pink-200 hover:bg-pink-50"
+              >
+                <X className="h-4 w-4" />
+                Clear Filters
+              </Button>
+            )}
             {isAdmin && (
-              <>
-                <Button 
-                  variant="outline"
-                  onClick={() => setIsStatsDrawerOpen(true)}
-                  className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 border-purple-200 hover:bg-purple-50"
-                >
-                  <BarChart className="h-4 w-4" />
-                  View Analytics
-                </Button>
-                <Button 
-                  onClick={handleOpenAddForm}
-                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
-                >
-                  <PlusCircle className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-                  Add New Sweet
-                </Button>
-              </>
+              <Button 
+                onClick={handleOpenAddForm}
+                className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+              >
+                <PlusCircle className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                Add New Sweet
+              </Button>
             )}
           </div>
         </div>
 
-        {/* Search and Filter Section */}
-        <div className="mb-6 animate-slide-in-up">
-          <SweetsToolbar onFilterChange={handleSearch} />
-        </div>
+        {/* Enhanced Statistics Cards - Admin Only */}
+        {isAdmin && stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            {[
+              {
+                title: 'Total Sweets',
+                value: stats.totalSweets,
+                subtitle: `${stats.categories} categories`,
+                icon: Package,
+                color: 'blue',
+                gradient: 'from-blue-500 to-cyan-500'
+              },
+              {
+                title: 'Inventory Value',
+                value: `$${stats.totalValue.toFixed(2)}`,
+                subtitle: `Avg: $${stats.averagePrice.toFixed(2)}`,
+                icon: DollarSign,
+                color: 'green',
+                gradient: 'from-green-500 to-emerald-500'
+              },
+              {
+                title: 'Low Stock',
+                value: stats.lowStockItems,
+                subtitle: 'Items below 10 units',
+                icon: AlertTriangle,
+                color: 'yellow',
+                gradient: 'from-yellow-500 to-orange-500'
+              },
+              {
+                title: 'Categories',
+                value: stats.categories,
+                subtitle: 'Unique varieties',
+                icon: TrendingUp,
+                color: 'purple',
+                gradient: 'from-purple-500 to-pink-500'
+              },
+              {
+                title: 'Status',
+                value: isMutating ? 'Updating...' : 'Active',
+                subtitle: 'System status',
+                icon: RefreshCcw,
+                color: 'gray',
+                gradient: 'from-gray-500 to-slate-500'
+              }
+            ].map((stat, index) => (
+              <Card 
+                key={stat.title}
+                className="border-0 shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-105 animate-fade-in-up group"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-700">{stat.title}</CardTitle>
+                  <div className={`p-2 rounded-lg bg-gradient-to-r ${stat.gradient} group-hover:scale-110 transition-transform duration-300`}>
+                    <stat.icon className="h-4 w-4 text-white" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
+                    {stat.value}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {stat.subtitle}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Enhanced Search and Filter Section */}
+        <Card className="mb-6 border-0 shadow-xl bg-white/95 backdrop-blur-sm animate-slide-in-up">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg">
+                <Filter className="h-5 w-5 text-white" />
+              </div>
+              <CardTitle className="text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Search & Filter
+              </CardTitle>
+              {isFiltered && (
+                <Badge variant="secondary" className="animate-pulse bg-indigo-100 text-indigo-700">
+                  {Object.keys(searchParams).length} filter(s) applied
+                </Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <SweetsToolbar onFilterChange={handleSearch} />
+          </CardContent>
+        </Card>
 
         {/* Enhanced Loading State */}
         {isLoading && (
@@ -279,6 +377,7 @@ const DashboardPage: React.FC = () => {
                 
                 <SweetGrid
                   sweets={sweets}
+                  onPurchase={handlePurchase}
                   onUpdateQuantity={handleUpdateQuantity}
                   onEdit={handleOpenEditForm}
                   onDelete={handleOpenDeleteAlert}
@@ -340,16 +439,6 @@ const DashboardPage: React.FC = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        {/* Stats Drawer */}
-        {isAdmin && (
-          <StatsDrawer
-            stats={stats}
-            isMutating={isMutating}
-            isOpen={isStatsDrawerOpen}
-            onOpenChange={setIsStatsDrawerOpen}
-          />
-        )}
       </div>
     </div>
   );
