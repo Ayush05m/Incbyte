@@ -162,16 +162,6 @@ const DashboardPage: React.FC = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3 animate-slide-in-right">
-            {isFiltered && (
-              <Button 
-                variant="outline" 
-                onClick={clearFilters}
-                className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 border-pink-200 hover:bg-pink-50"
-              >
-                <X className="h-4 w-4" />
-                Clear Filters
-              </Button>
-            )}
             {isAdmin && (
               <>
                 <Button 
