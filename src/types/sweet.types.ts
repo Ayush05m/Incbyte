@@ -18,3 +18,31 @@ export interface SearchParams {
   category?: string;
   priceRange?: [number, number];
 }
+
+// Sweet.ts
+export interface Sweet {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  created_at?: string;
+}
+export interface SweetCreate {
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+}
+export interface SweetUpdate {
+  name?: string;
+  category?: string;
+  price?: number;
+  stock?: number;
+}
+export interface SweetPurchase {
+  quantity: number;
+}
+export interface SweetRestock {
+  quantity: number;
+}

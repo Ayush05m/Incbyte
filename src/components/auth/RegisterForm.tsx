@@ -2,7 +2,6 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/auth.service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +18,6 @@ const registerSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export const RegisterForm: React.FC = () => {
-  const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
   
   const {
@@ -34,10 +32,9 @@ export const RegisterForm: React.FC = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      const response = await authService.register(data);
-      login(response.user, response.token);
-      toast.success("Registration successful!");
-      navigate('/dashboard');
+      await authService.register(data);
+      toast.success("Registration successful! Please log in to continue.");
+      navigate('/login');
     } catch (error: any) {
       let message = 'Registration failed. Please try again.';
       if (error.response?.status === 409) {

@@ -3,12 +3,25 @@ import { Sweet, SearchParams, CreateSweetDto, UpdateSweetDto } from '@/types/swe
 
 export const sweetsService = {
   getSweets: async (params?: SearchParams): Promise<Sweet[]> => {
-    const response = await api.get('/sweets', { params });
+    const apiParams: { [key: string]: any } = {
+      query: params?.query,
+      category: params?.category,
+    };
+
+    if (params?.priceRange) {
+      apiParams.min_price = params.priceRange[0];
+      apiParams.max_price = params.priceRange[1];
+    }
+
+    // Filter out undefined/null params before sending
+    Object.keys(apiParams).forEach(key => apiParams[key] === undefined && delete apiParams[key]);
+
+    const response = await api.get('/sweets/', { params: apiParams });
     return response.data;
   },
 
   addSweet: async (sweetData: CreateSweetDto): Promise<Sweet> => {
-    const response = await api.post('/sweets', sweetData);
+    const response = await api.post('/sweets/', sweetData);
     return response.data;
   },
 

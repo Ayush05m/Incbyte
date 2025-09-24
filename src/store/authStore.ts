@@ -46,11 +46,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: storage,
-      onRehydrateError: (err) => {
-        console.error("Failed to rehydrate auth state, logging out.", err);
-        // If rehydration fails, it's safest to log out to prevent app crashes.
-        useAuthStore.getState().logout();
-      },
     }
   )
 );
