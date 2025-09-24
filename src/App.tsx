@@ -9,6 +9,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/layout/Layout";
+import { AuthGuard } from "./components/auth/AuthGuard";
 
 const queryClient = new QueryClient();
 
@@ -21,9 +22,30 @@ const App = () => (
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <AuthGuard isPrivate={true}>
+                  <DashboardPage />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <AuthGuard isPrivate={false}>
+                  <LoginPage />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <AuthGuard isPrivate={false}>
+                  <RegisterPage />
+                </AuthGuard>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

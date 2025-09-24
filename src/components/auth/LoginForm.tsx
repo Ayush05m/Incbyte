@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from "sonner";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -20,6 +20,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const LoginForm: React.FC = () => {
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/dashboard';
   
   const {
     register,
@@ -35,7 +37,7 @@ export const LoginForm: React.FC = () => {
       const response = await authService.login(data.email, data.password);
       login(response.user, response.token);
       toast.success("Login successful!");
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } catch (error: any) {
       const message = error.response?.data?.message || 'Login failed. Please check your credentials.';
       setError('root', { message });
