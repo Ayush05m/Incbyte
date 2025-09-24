@@ -7,13 +7,12 @@ import { SearchParams, Sweet, CreateSweetDto, UpdateSweetDto } from '@/types/swe
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   PlusCircle, 
   AlertTriangle,
   RefreshCcw,
-  Filter,
   X,
   Sparkles,
   Heart,
@@ -195,27 +194,10 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Enhanced Search and Filter Section */}
-        <Card className="mb-6 border-0 shadow-xl bg-white/95 backdrop-blur-sm animate-slide-in-up">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg">
-                <Filter className="h-5 w-5 text-white" />
-              </div>
-              <CardTitle className="text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Search & Filter
-              </CardTitle>
-              {isFiltered && (
-                <Badge variant="secondary" className="animate-pulse bg-indigo-100 text-indigo-700">
-                  {Object.keys(searchParams).length} filter(s) applied
-                </Badge>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <SweetsToolbar onFilterChange={handleSearch} />
-          </CardContent>
-        </Card>
+        {/* Search and Filter Section */}
+        <div className="mb-6 animate-slide-in-up">
+          <SweetsToolbar onFilterChange={handleSearch} />
+        </div>
 
         {/* Enhanced Loading State */}
         {isLoading && (
