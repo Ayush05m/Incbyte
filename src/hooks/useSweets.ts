@@ -21,3 +21,15 @@ export const usePurchaseSweet = () => {
     },
   });
 };
+
+export const useUpdateSweetQuantity = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ sweetId, newQuantity }: { sweetId: string; newQuantity: number }) =>
+      sweetsService.updateSweetQuantity(sweetId, newQuantity),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sweets'] });
+    },
+  });
+};

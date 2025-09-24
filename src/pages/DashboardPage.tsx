@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSweets, usePurchaseSweet } from '@/hooks/useSweets';
+import { useSweets, usePurchaseSweet, useUpdateSweetQuantity } from '@/hooks/useSweets';
 import { SweetGrid } from '@/components/sweets/SweetGrid';
 import { SweetSearch } from '@/components/sweets/SweetSearch';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -10,6 +10,7 @@ const DashboardPage: React.FC = () => {
   const [searchParams, setSearchParams] = useState<SearchParams>({});
   const { data: sweets, isLoading, error } = useSweets(searchParams);
   const purchaseMutation = usePurchaseSweet();
+  const updateQuantityMutation = useUpdateSweetQuantity();
 
   const handleSearch = (params: SearchParams) => {
     setSearchParams(params);
@@ -23,6 +24,17 @@ const DashboardPage: React.FC = () => {
       toast.error("Purchase failed. Please try again.");
     }
   };
+
+  const handleUpdateQuantity = async (sweetId: string, newQuantity: number) => {
+    try {
+      await updateQuantityMutation.mutateAsync({ sweetId, newQuantity });
+      toast.success("Quantity updated!");
+    } catch (err) {
+      toast.error("Failed to update quantity.");
+    }
+  };
+
+  const isMutating = purchaseMutation.isPending || updateQuantityMutation.isPending;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -45,7 +57,8 @@ const DashboardPage: React.FC = () => {
         <SweetGrid
           sweets={sweets}
           onPurchase={handlePurchase}
-          isLoading={purchaseMutation.isPending}
+          onUpdateQuantity={handleUpdateQuantity}
+          isLoading={isMutating}
         />
       )}
     </div>

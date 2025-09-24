@@ -10,8 +10,6 @@ import RegisterPage from "./pages/RegisterPage";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/layout/Layout";
 import { AuthGuard } from "./components/auth/AuthGuard";
-import AdminPage from "./pages/AdminPage";
-import { AdminGuard } from "./components/auth/AdminGuard";
 
 const queryClient = new QueryClient();
 
@@ -30,14 +28,6 @@ const App = () => (
                 <AuthGuard isPrivate={true}>
                   <DashboardPage />
                 </AuthGuard>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <AdminGuard>
-                  <AdminPage />
-                </AdminGuard>
               }
             />
             <Route

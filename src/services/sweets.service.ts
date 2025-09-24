@@ -22,5 +22,14 @@ export const sweetsService = {
     await new Promise(resolve => setTimeout(resolve, 500));
     console.log(`Purchased ${quantity} of sweet ${sweetId}`);
     return { success: true };
+  },
+  updateSweetQuantity: async (sweetId: string, newQuantity: number): Promise<Sweet> => {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const sweetIndex = mockSweets.findIndex(s => s.id === sweetId);
+    if (sweetIndex === -1) {
+      throw new Error("Sweet not found");
+    }
+    mockSweets[sweetIndex].quantity = newQuantity;
+    return mockSweets[sweetIndex];
   }
 };

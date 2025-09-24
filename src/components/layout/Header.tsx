@@ -23,11 +23,6 @@ export const Header = () => {
           <Link to="/dashboard" className="text-sm font-medium text-gray-600 hover:text-primary-600">
             Dashboard
           </Link>
-          {isAuthenticated && user?.role === 'admin' && (
-            <Link to="/admin" className="text-sm font-medium text-primary-600 hover:text-primary-700 font-semibold">
-              Admin
-            </Link>
-          )}
           {isAuthenticated ? (
             <>
               <span className="text-sm text-gray-700">Welcome, {user?.username}!</span>
