@@ -2,28 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { SearchParams } from '@/types/sweet.types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { Search, X, DollarSign, Tag, RefreshCcw, SlidersHorizontal } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search, Filter, X, DollarSign, Tag, RefreshCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
 
 interface SweetsToolbarProps {
   onFilterChange: (params: SearchParams) => void;
 }
 
 const CATEGORIES = ["Cakes", "Pastries", "Candies", "Frozen"];
-const MAX_PRICE = 5000;
+const MAX_PRICE = 50;
 
 export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, MAX_PRICE]);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   
   const debouncedQuery = useDebounce(query, 300);
 
   const activeFiltersCount = [
+    debouncedQuery,
     category,
     priceRange[0] > 0 || priceRange[1] < MAX_PRICE
   ].filter(Boolean).length;
@@ -38,102 +40,124 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
     onFilterChange(params);
   }, [debouncedQuery, category, priceRange, onFilterChange]);
 
-  const handleResetFilters = () => {
+  const handleReset = () => {
+    setQuery('');
     setCategory('');
     setPriceRange([0, MAX_PRICE]);
   };
 
-  return (
-    <div className="p-2 rounded-lg border bg-card text-card-foreground shadow-sm">
-      <div className="flex items-center gap-2">
-        {/* Search Bar */}
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search sweets..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-10 h-9"
-          />
-          {query && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setQuery('')}
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+  const handleCategoryChange = (value: string) => {
+    setCategory(value === 'all' ? '' : value);
+  };
 
-        {/* Filters Popover */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="relative">
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filters
-              {activeFiltersCount > 0 && (
-                <Badge variant="secondary" className="absolute -top-1.5 -right-1.5 h-4 w-4 flex items-center justify-center p-0 text-xs rounded-full">
-                  {activeFiltersCount}
-                </Badge>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-72" align="end">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium leading-none">Filters</h4>
-                {activeFiltersCount > 0 && (
-                  <Button onClick={handleResetFilters} variant="ghost" size="sm" className="h-auto p-1 text-xs gap-1">
-                    <RefreshCcw className="h-3 w-3" />
-                    Reset
-                  </Button>
-                )}
+  const hasFilters = activeFiltersCount > 0;
+
+  return (
+    <div className="space-y-4">
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Input
+          type="text"
+          placeholder="Search sweets..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="pl-10 pr-10 h-11 text-base border-gray-300 focus:border-primary transition-colors duration-200"
+        />
+        {query && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setQuery('')}
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 rounded-full"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Filter Toggle and Reset */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+          className="gap-2"
+        >
+          <Filter className="h-4 w-4" />
+          <span>Filters</span>
+          {activeFiltersCount > 0 && (
+            <Badge variant="secondary" className="ml-1">
+              {activeFiltersCount}
+            </Badge>
+          )}
+          {isAdvancedOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+        
+        {hasFilters && (
+          <Button 
+            onClick={handleReset} 
+            variant="ghost" 
+            size="sm" 
+            className="gap-2 text-gray-600 hover:text-red-600"
+          >
+            <RefreshCcw className="h-4 w-4" />
+            Clear
+          </Button>
+        )}
+      </div>
+
+      {/* Advanced Filters Panel */}
+      <div className={`
+        transition-all duration-300 ease-in-out overflow-hidden
+        ${isAdvancedOpen 
+          ? 'max-h-[500px] opacity-100' 
+          : 'max-h-0 opacity-0'
+        }
+      `}>
+        <Card className="border-gray-200 bg-gray-50/50">
+          <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Category Filter */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Tag className="h-4 w-4 text-gray-600" />
+                <label className="font-medium text-gray-800">Category</label>
               </div>
-              <Separator />
-              {/* Category Filter */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium flex items-center gap-2 text-muted-foreground">
-                  <Tag className="h-4 w-4" />
-                  Category
-                </label>
-                <div className="flex flex-wrap gap-1.5">
+              <Select value={category} onValueChange={handleCategoryChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {CATEGORIES.map(cat => (
-                    <Button
-                      key={cat}
-                      variant={category === cat ? "default" : "outline"}
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => setCategory(cat === category ? '' : cat)}
-                    >
-                      {cat}
-                    </Button>
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
-                </div>
-              </div>
-              {/* Price Range Filter */}
-              <div className="space-y-3">
-                <label className="text-xs font-medium flex items-center gap-2 text-muted-foreground">
-                  <DollarSign className="h-4 w-4" />
-                  Price Range
-                </label>
-                <Slider
-                  min={0}
-                  max={MAX_PRICE}
-                  step={100}
-                  value={priceRange}
-                  onValueChange={(value) => setPriceRange(value as [number, number])}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>₹{priceRange[0]}</span>
-                  <span>₹{priceRange[1]}</span>
-                </div>
-              </div>
+                </SelectContent>
+              </Select>
             </div>
-          </PopoverContent>
-        </Popover>
+
+            {/* Price Range Filter */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-gray-600" />
+                  <label className="font-medium text-gray-800">Price Range</label>
+                </div>
+                <span className="text-sm font-semibold text-primary">
+                  ₹{priceRange[0]} - ₹{priceRange[1]}
+                </span>
+              </div>
+              <Slider
+                min={0}
+                max={MAX_PRICE}
+                step={1}
+                value={priceRange}
+                onValueChange={(value) => setPriceRange(value as [number, number])}
+                className="w-full"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
