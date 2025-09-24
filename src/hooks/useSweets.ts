@@ -42,18 +42,6 @@ export const useDeleteSweet = () => {
   });
 };
 
-export const usePurchaseSweet = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ sweetId, quantity }: { sweetId: number; quantity: number }) =>
-      sweetsService.purchaseSweet(sweetId, quantity),
-    onSuccess: () => {
-      // After a successful purchase, invalidate all sweets queries to refetch and show correct stock.
-      queryClient.invalidateQueries({ queryKey: ['sweets'] });
-    },
-  });
-};
-
 export const useUpdateSweetQuantity = (searchParams?: SearchParams) => {
   const queryClient = useQueryClient();
   const queryKey = ['sweets', searchParams];

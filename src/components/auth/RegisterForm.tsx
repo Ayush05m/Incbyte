@@ -15,7 +15,11 @@ const registerSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
+type RegisterFormData = {
+  username: string;
+  email: string;
+  password: string;
+}
 
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();

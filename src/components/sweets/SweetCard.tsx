@@ -7,10 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/store/authStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { useCartStore } from '@/store/cartStore';
 
 interface SweetCardProps {
   sweet: Sweet;
-  onPurchase: (sweetId: number, quantity: number) => void;
   onUpdateQuantity: (sweetId: number, newQuantity: number) => void;
   onEdit: (sweet: Sweet) => void;
   onDelete: (sweetId: number) => void;
@@ -19,13 +19,13 @@ interface SweetCardProps {
 
 export const SweetCard: React.FC<SweetCardProps> = ({ 
   sweet, 
-  onPurchase,
   onUpdateQuantity,
   onEdit,
   onDelete,
   isLoading = false 
 }) => {
   const { user } = useAuthStore();
+  const { addItem } = useCartStore();
   const isAdmin = user?.role === 'admin';
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   
@@ -122,8 +122,9 @@ export const SweetCard: React.FC<SweetCardProps> = ({
               className="w-16 h-9 text-center"
               disabled={isOutOfStock || isLoading}
             />
-            <Button onClick={() => onPurchase(sweet.id, purchaseQuantity)} disabled={isOutOfStock || isLoading || purchaseQuantity > sweet.quantity} size="sm">
-              <ShoppingCart className="w-4 h-4" />
+            <Button onClick={() => addItem(sweet, purchaseQuantity)} disabled={isOutOfStock || isLoading || purchaseQuantity > sweet.quantity} size="sm">
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
             </Button>
           </div>
         )}

@@ -1,10 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/authStore';
-import { Candy } from 'lucide-react';
+import { Candy, ShoppingCart } from 'lucide-react';
+import { useCartStore, useCartTotals } from '@/store/cartStore';
 
 export const Header = () => {
   const { isAuthenticated, user, logout } = useAuthStore();
+  const { toggleCart } = useCartStore();
+  const { cartCount } = useCartTotals();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -40,6 +43,14 @@ export const Header = () => {
               </Button>
             </>
           )}
+          <Button variant="ghost" size="icon" onClick={toggleCart} className="relative">
+            <ShoppingCart className="h-5 w-5" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs text-white">
+                {cartCount}
+              </span>
+            )}
+          </Button>
         </div>
       </nav>
     </header>

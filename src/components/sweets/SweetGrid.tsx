@@ -5,7 +5,6 @@ import { useAuthStore } from '@/store/authStore';
 
 interface SweetGridProps {
   sweets: Sweet[];
-  onPurchase: (sweetId: number, quantity: number) => void;
   onUpdateQuantity: (sweetId: number, newQuantity: number) => void;
   onEdit: (sweet: Sweet) => void;
   onDelete: (sweetId: number) => void;
@@ -13,7 +12,7 @@ interface SweetGridProps {
   isFiltered: boolean;
 }
 
-export const SweetGrid: React.FC<SweetGridProps> = ({ sweets, onPurchase, onUpdateQuantity, onEdit, onDelete, isLoading, isFiltered }) => {
+export const SweetGrid: React.FC<SweetGridProps> = ({ sweets, onUpdateQuantity, onEdit, onDelete, isLoading, isFiltered }) => {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
 
@@ -33,7 +32,6 @@ export const SweetGrid: React.FC<SweetGridProps> = ({ sweets, onPurchase, onUpda
         <SweetCard 
           key={sweet.id} 
           sweet={sweet} 
-          onPurchase={onPurchase}
           onUpdateQuantity={onUpdateQuantity}
           onEdit={onEdit}
           onDelete={onDelete}

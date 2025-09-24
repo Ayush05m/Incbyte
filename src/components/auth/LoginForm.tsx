@@ -15,7 +15,11 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+// Ensure LoginFormData has required email and password fields
+type LoginFormData = {
+  email: string;
+  password: string;
+};
 
 export const LoginForm: React.FC = () => {
   const login = useAuthStore((state) => state.login);

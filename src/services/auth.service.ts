@@ -32,8 +32,7 @@ export const authService = {
     return authenticateAndFetchUser(authPromise);
   },
   register: async (data: UserCreate): Promise<User> => {
-    // Register endpoint creates a user but does not log them in
-    const response = await api.post('/users/', data);
+    const response = await api.post('/auth/register', data);
     return response.data;
   },
 };

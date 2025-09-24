@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { useSweets, usePurchaseSweet, useUpdateSweetQuantity, useAddSweet, useUpdateSweet, useDeleteSweet } from '@/hooks/useSweets';
+import { useSweets, useUpdateSweetQuantity, useAddSweet, useUpdateSweet, useDeleteSweet } from '@/hooks/useSweets';
 import { SweetGrid } from '@/components/sweets/SweetGrid';
 import { SweetsToolbar } from '@/components/sweets/SweetsToolbar';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -35,7 +35,6 @@ const DashboardPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
-  const purchaseMutation = usePurchaseSweet();
   const updateQuantityMutation = useUpdateSweetQuantity(searchParams);
   const addSweetMutation = useAddSweet();
   const updateSweetMutation = useUpdateSweet();
@@ -61,15 +60,6 @@ const DashboardPage: React.FC = () => {
   }, [sweets]);
 
   const handleSearch = useCallback((params: SearchParams) => setSearchParams(params), []);
-  
-  const handlePurchase = async (sweetId: number, quantity: number) => {
-    const sweet = sweets?.find(s => s.id === sweetId);
-    toast.promise(purchaseMutation.mutateAsync({ sweetId, quantity }), {
-      loading: 'Processing purchase...',
-      success: `Successfully purchased ${quantity} of ${sweet?.name || 'a sweet'}!`,
-      error: (err: any) => err?.response?.data?.message || 'Purchase failed. Please try again.',
-    });
-  };
 
   const handleUpdateQuantity = (sweetId: number, newQuantity: number) => {
     toast.promise(updateQuantityMutation.mutateAsync({ sweetId, newQuantity }), {
@@ -127,7 +117,7 @@ const DashboardPage: React.FC = () => {
     toast.success('Filters cleared');
   };
 
-  const isMutating = purchaseMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending || updateQuantityMutation.isPending;
+  const isMutating = addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending || updateQuantityMutation.isPending;
   const isFiltered = Object.keys(searchParams).length > 0;
 
   return (
@@ -376,7 +366,6 @@ const DashboardPage: React.FC = () => {
                 
                 <SweetGrid
                   sweets={sweets}
-                  onPurchase={handlePurchase}
                   onUpdateQuantity={handleUpdateQuantity}
                   onEdit={handleOpenEditForm}
                   onDelete={handleOpenDeleteAlert}
@@ -439,136 +428,6 @@ const DashboardPage: React.FC = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-
-      {/* <style>{`
-        @keyframes gradient-x {
-          0%, 100% {
-            background-size: 200% 200%;
-            background-position: left center;
-          }
-          50% {
-            background-size: 200% 200%;
-            background-position: right center;
-          }
-        }
-
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes slide-in-left {
-          from {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slide-in-right {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slide-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes scale-in {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-
-        .animate-gradient-x {
-          animation: gradient-x 3s ease infinite;
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
-        }
-
-        .animate-slide-in-left {
-          animation: slide-in-left 0.8s ease-out;
-        }
-
-        .animate-slide-in-right {
-          animation: slide-in-right 0.8s ease-out;
-        }
-
-        .animate-slide-in-up {
-          animation: slide-in-up 0.6s ease-out;
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out forwards;
-          opacity: 0;
-        }
-
-        .animate-scale-in {
-          animation: scale-in 0.3s ease-out;
-        }
-
-        .animate-shake {
-          animation: shake 0.5s ease-in-out;
-        }
-
-        .animation-delay-500 {
-          animation-delay: 0.5s;
-        }
-
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style> */}
     </div>
   );
 };
