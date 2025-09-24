@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Sweet } from '@/types/sweet.types';
 import { SweetCard } from './SweetCard';
 import { useAuthStore } from '@/store/authStore';
-import { Package, Sparkles, Grid3X3, List, Filter } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Package, Sparkles } from 'lucide-react';
 
 interface SweetGridProps {
   sweets: Sweet[];
-  onPurchase: (sweetId: number, quantity: number) => void;
-  onUpdateQuantity: (sweetId: number, newQuantity: number) => void;
   onEdit: (sweet: Sweet) => void;
   onDelete: (sweetId: number) => void;
+  onRestock: (sweet: Sweet) => void;
   isLoading?: boolean;
   isFiltered: boolean;
 }
 
 export const SweetGrid: React.FC<SweetGridProps> = ({ 
   sweets, 
-  onPurchase, 
-  onUpdateQuantity, 
   onEdit, 
   onDelete, 
+  onRestock,
   isLoading, 
   isFiltered 
 }) => {
@@ -78,10 +74,9 @@ export const SweetGrid: React.FC<SweetGridProps> = ({
           >
             <SweetCard 
               sweet={sweet} 
-              onPurchase={onPurchase}
-              onUpdateQuantity={onUpdateQuantity}
               onEdit={onEdit}
               onDelete={onDelete}
+              onRestock={onRestock}
               isLoading={isLoading} 
             />
           </div>

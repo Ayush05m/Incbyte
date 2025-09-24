@@ -7,7 +7,7 @@ import { SearchParams, Sweet, CreateSweetDto, UpdateSweetDto } from '@/types/swe
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   PlusCircle, 
@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { SweetFormDialog } from '@/components/sweets/SweetFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { RestockDialog } from '@/components/sweets/RestockDialog';
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -32,16 +33,14 @@ const DashboardPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSweet, setEditingSweet] = useState<Sweet | null>(null);
   const [sweetToDelete, setSweetToDelete] = useState<Sweet | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [restockingSweet, setRestockingSweet] = useState<Sweet | null>(null);
 
   const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
-  // const purchaseMutation = usePurchaseSweet();
   const updateQuantityMutation = useUpdateSweetQuantity(searchParams);
   const addSweetMutation = useAddSweet();
   const updateSweetMutation = useUpdateSweet();
   const deleteSweetMutation = useDeleteSweet();
 
-  // Statistics calculations
   const stats = useMemo(() => {
     if (!sweets?.length) return null;
 
@@ -61,23 +60,6 @@ const DashboardPage: React.FC = () => {
   }, [sweets]);
 
   const handleSearch = useCallback((params: SearchParams) => setSearchParams(params), []);
-  
-  const handlePurchase = async (sweetId: number, quantity: number) => {
-    const sweet = sweets?.find(s => s.id === sweetId);
-    // toast.promise(purchaseMutation.mutateAsync({ sweetId, quantity }), {
-    //   loading: 'Processing purchase...',
-    //   success: `Successfully purchased ${quantity} of ${sweet?.name || 'a sweet'}!`,
-    //   error: (err: any) => err?.response?.data?.message || 'Purchase failed. Please try again.',
-    // });
-  };
-
-  const handleUpdateQuantity = (sweetId: number, newQuantity: number) => {
-    toast.promise(updateQuantityMutation.mutateAsync({ sweetId, newQuantity }), {
-      loading: 'Updating quantity...',
-      success: 'Quantity updated successfully!',
-      error: (err: any) => err?.response?.data?.message || 'Failed to update quantity.',
-    });
-  };
   
   const handleOpenAddForm = () => {
     setEditingSweet(null);
@@ -122,18 +104,34 @@ const DashboardPage: React.FC = () => {
     setSweetToDelete(null);
   };
 
+  const handleOpenRestockDialog = (sweet: Sweet) => {
+    setRestockingSweet(sweet);
+  };
+
+  const handleRestockSubmit = (newQuantity: number) => {
+    if (!restockingSweet) return;
+
+    const promise = updateQuantityMutation.mutateAsync({ sweetId: restockingSweet.id, newQuantity });
+
+    toast.promise(promise, {
+      loading: 'Updating quantity...',
+      success: 'Quantity updated successfully!',
+      error: (err: any) => err?.response?.data?.message || 'Failed to update quantity.',
+    });
+
+    promise.then(() => setRestockingSweet(null)).catch(() => {});
+  };
+
   const clearFilters = () => {
     setSearchParams({});
     toast.success('Filters cleared');
   };
 
-  // const isMutating = purchaseMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending || updateQuantityMutation.isPending;
   const isMutating = addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending || updateQuantityMutation.isPending;
   const isFiltered = Object.keys(searchParams).length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-100 relative overflow-hidden">
-      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-2000"></div>
@@ -141,7 +139,6 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8 animate-fade-in">
-        {/* Enhanced Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
           <div className="text-center md:text-left transform animate-slide-in-left">
             <div className="flex items-center gap-4 mb-4">
@@ -196,7 +193,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Enhanced Statistics Cards - Admin Only */}
         {isAdmin && stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             {[
@@ -205,7 +201,6 @@ const DashboardPage: React.FC = () => {
                 value: stats.totalSweets,
                 subtitle: `${stats.categories} categories`,
                 icon: Package,
-                color: 'blue',
                 gradient: 'from-blue-500 to-cyan-500'
               },
               {
@@ -213,7 +208,6 @@ const DashboardPage: React.FC = () => {
                 value: `₹${stats.totalValue.toFixed(2)}`,
                 subtitle: `Avg: ₹${stats.averagePrice.toFixed(2)}`,
                 icon: DollarSign,
-                color: 'green',
                 gradient: 'from-green-500 to-emerald-500'
               },
               {
@@ -221,7 +215,6 @@ const DashboardPage: React.FC = () => {
                 value: stats.lowStockItems,
                 subtitle: 'Items below 10 units',
                 icon: AlertTriangle,
-                color: 'yellow',
                 gradient: 'from-yellow-500 to-orange-500'
               },
               {
@@ -229,7 +222,6 @@ const DashboardPage: React.FC = () => {
                 value: stats.categories,
                 subtitle: 'Unique varieties',
                 icon: TrendingUp,
-                color: 'purple',
                 gradient: 'from-purple-500 to-pink-500'
               },
               {
@@ -237,7 +229,6 @@ const DashboardPage: React.FC = () => {
                 value: isMutating ? 'Updating...' : 'Active',
                 subtitle: 'System status',
                 icon: RefreshCcw,
-                color: 'gray',
                 gradient: 'from-gray-500 to-slate-500'
               }
             ].map((stat, index) => (
@@ -265,7 +256,6 @@ const DashboardPage: React.FC = () => {
           </div>
         )}
 
-        {/* Enhanced Search and Filter Section */}
         <Card className="mb-6 border-0 shadow-xl bg-white/95 backdrop-blur-sm animate-slide-in-up">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -287,7 +277,6 @@ const DashboardPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Enhanced Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
             <div className="relative">
@@ -297,19 +286,9 @@ const DashboardPage: React.FC = () => {
               </div>
             </div>
             <p className="mt-4 text-gray-600 animate-pulse">Loading delicious sweets...</p>
-            <div className="flex gap-1 mt-2">
-              {[...Array(3)].map((_, i) => (
-                <div 
-                  key={i}
-                  className="w-2 h-2 bg-pink-400 rounded-full animate-bounce"
-                  style={{ animationDelay: `${i * 200}ms` }}
-                ></div>
-              ))}
-            </div>
           </div>
         )}
 
-        {/* Enhanced Error State */}
         {error && (
           <Card className="border-0 shadow-xl bg-gradient-to-r from-red-50 to-pink-50 animate-shake">
             <CardContent className="text-center py-10">
@@ -331,7 +310,6 @@ const DashboardPage: React.FC = () => {
           </Card>
         )}
 
-        {/* Enhanced Sweet Grid */}
         {!isLoading && !error && sweets && (
           <>
             {sweets.length === 0 ? (
@@ -377,10 +355,9 @@ const DashboardPage: React.FC = () => {
                 
                 <SweetGrid
                   sweets={sweets}
-                  onPurchase={handlePurchase}
-                  onUpdateQuantity={handleUpdateQuantity}
                   onEdit={handleOpenEditForm}
                   onDelete={handleOpenDeleteAlert}
+                  onRestock={handleOpenRestockDialog}
                   isLoading={isMutating}
                   isFiltered={isFiltered}
                 />
@@ -389,7 +366,6 @@ const DashboardPage: React.FC = () => {
           </>
         )}
 
-        {/* Sweet Form Dialog */}
         {isAdmin && (
           <SweetFormDialog
             isOpen={isFormOpen}
@@ -400,7 +376,16 @@ const DashboardPage: React.FC = () => {
           />
         )}
 
-        {/* Enhanced Delete Confirmation Dialog */}
+        {isAdmin && (
+          <RestockDialog
+            isOpen={!!restockingSweet}
+            onClose={() => setRestockingSweet(null)}
+            onSubmit={handleRestockSubmit}
+            sweet={restockingSweet}
+            isSubmitting={updateQuantityMutation.isPending}
+          />
+        )}
+
         <AlertDialog open={!!sweetToDelete} onOpenChange={(open) => !open && setSweetToDelete(null)}>
           <AlertDialogContent className="border-0 shadow-2xl animate-scale-in">
             <AlertDialogHeader>
