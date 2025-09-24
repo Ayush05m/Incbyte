@@ -20,9 +20,9 @@ const DashboardPage: React.FC = () => {
   const [editingSweet, setEditingSweet] = useState<Sweet | null>(null);
   const [sweetToDelete, setSweetToDelete] = useState<Sweet | null>(null);
 
-  const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
+  const { data: sweets, isLoading, error, refetch } = useSweets(search_params);
   const purchaseMutation = usePurchaseSweet();
-  const updateQuantityMutation = useUpdateSweetQuantity(searchParams);
+  const updateQuantityMutation = useUpdateSweetQuantity(search_params);
   const addSweetMutation = useAddSweet();
   const updateSweetMutation = useUpdateSweet();
   const deleteSweetMutation = useDeleteSweet();
@@ -53,23 +53,17 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleFormSubmit = async (data: CreateSweetDto | UpdateSweetDto) => {
-    if (!editingSweet) {
-      const action = addSweetMutation.mutateAsync(data as CreateSweetDto);
-      toast.promise(action, {
-        loading: 'Adding sweet...',
-        success: `Sweet added successfully!`,
-        error: `Failed to add sweet.`,
-      });
-      action.then(() => setIsFormOpen(false));
-    } else {
-      const action = updateSweetMutation.mutateAsync({ sweetId: editingSweet.id, sweetData: data });
-      toast.promise(action, {
-        loading: 'Updating sweet...',
-        success: `Sweet updated successfully!`,
-        error: `Failed to update sweet.`,
-      });
-      action.then(() => setIsFormOpen(false));
-    }
+    const action = editingSweet
+      ? updateSweetMutation.mutateAsync({ sweetId: editingSweet.id, sweetData: data })
+      : addSweetMutation.mutateAsync(data as CreateSweetDto);
+
+    toast.promise(action, {
+      loading: editingSweet ? 'Updating sweet...' : 'Adding sweet...',
+      success: `Sweet ${editingSweet ? 'updated' : 'added'} successfully!`,
+      error: (err: any) => err?.response?.data?.message || `Failed to ${editingSweet ? 'update' : 'add'} sweet.`,
+    });
+
+    action.then(() => setIsFormOpen(false)).catch(() => {});
   };
 
   const handleOpenDeleteAlert = (sweetId: number) => {
@@ -81,16 +75,18 @@ const DashboardPage: React.FC = () => {
 
   const handleDeleteConfirm = async () => {
     if (!sweetToDelete) return;
+    
     toast.promise(deleteSweetMutation.mutateAsync(sweetToDelete.id), {
       loading: `Deleting ${sweetToDelete.name}...`,
       success: `${sweetToDelete.name} deleted successfully!`,
-      error: `Failed to delete ${sweetToDelete.name}.`,
+      error: (err: any) => err?.response?.data?.message || `Failed to delete ${sweetToDelete.name}.`,
     });
+
     setSweetToDelete(null);
   };
 
   const isMutating = purchaseMutation.isPending || addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending;
-  const isFiltered = Object.keys(searchParams).length > 0;
+  const isFiltered = Object.keys(search_params).length > 0;
 
   return (
     <div className="container mx-auto px-4 py-8">

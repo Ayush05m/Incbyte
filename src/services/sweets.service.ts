@@ -13,6 +13,12 @@ let mockSweets: Sweet[] = [
 
 let nextId = mockSweets.length + 1;
 
+const createApiError = (status: number, message: string) => {
+  const error: any = new Error(message);
+  error.response = { status, data: { message } };
+  return error;
+};
+
 export const sweetsService = {
   getSweets: async (params?: SearchParams): Promise<Sweet[]> => {
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -44,7 +50,9 @@ export const sweetsService = {
   updateSweet: async (sweetId: number, sweetData: UpdateSweetDto): Promise<Sweet> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     const index = mockSweets.findIndex(s => s.id === sweetId);
-    if (index === -1) throw new Error("Sweet not found");
+    if (index === -1) {
+      throw createApiError(404, "Sweet not found.");
+    }
     mockSweets[index] = { ...mockSweets[index], ...sweetData, updatedAt: new Date().toISOString() };
     return mockSweets[index];
   },
@@ -53,20 +61,22 @@ export const sweetsService = {
     await new Promise(resolve => setTimeout(resolve, 500));
     const initialLength = mockSweets.length;
     mockSweets = mockSweets.filter(s => s.id !== sweetId);
-    if (mockSweets.length === initialLength) throw new Error("Sweet not found");
+    if (mockSweets.length === initialLength) {
+      throw createApiError(404, "Sweet not found.");
+    }
     return { success: true };
   },
 
   purchaseSweet: async (sweetId: number, quantity: number): Promise<{ success: boolean }> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     const sweetIndex = mockSweets.findIndex(s => s.id === sweetId);
-    if (sweetIndex === -1) throw new Error("Sweet not found");
+    if (sweetIndex === -1) {
+      throw createApiError(404, "Sweet not found.");
+    }
 
     const sweet = mockSweets[sweetIndex];
     if (sweet.quantity < quantity) {
-      const error: any = new Error('Insufficient stock');
-      error.response = { status: 400, data: { message: 'Not enough items in stock.' } };
-      throw error;
+      throw createApiError(400, 'Not enough items in stock.');
     }
 
     mockSweets[sweetIndex].quantity -= quantity;
@@ -77,7 +87,9 @@ export const sweetsService = {
   updateSweetQuantity: async (sweetId: number, newQuantity: number): Promise<Sweet> => {
     await new Promise(resolve => setTimeout(resolve, 100));
     const sweetIndex = mockSweets.findIndex(s => s.id === sweetId);
-    if (sweetIndex === -1) throw new Error("Sweet not found");
+    if (sweetIndex === -1) {
+      throw createApiError(404, "Sweet not found.");
+    }
     mockSweets[sweetIndex].quantity = newQuantity;
     mockSweets[sweetIndex].updatedAt = new Date().toISOString();
     return mockSweets[sweetIndex];
