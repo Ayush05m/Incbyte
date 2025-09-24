@@ -30,11 +30,11 @@ const DashboardPage: React.FC = () => {
 
   const handleSearch = (params: SearchParams) => setSearchParams(params);
   
-  const handlePurchase = async (sweetId: number) => {
+  const handlePurchase = async (sweetId: number, quantity: number) => {
     const sweet = sweets?.find(s => s.id === sweetId);
-    toast.promise(purchaseMutation.mutateAsync({ sweetId, quantity: 1 }), {
+    toast.promise(purchaseMutation.mutateAsync({ sweetId, quantity }), {
       loading: 'Processing purchase...',
-      success: `Successfully purchased ${sweet?.name || 'a sweet'}!`,
+      success: `Successfully purchased ${quantity} of ${sweet?.name || 'a sweet'}!`,
       error: (err: any) => err?.response?.data?.message || 'Purchase failed. Please try again.',
     });
   };

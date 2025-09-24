@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 
 interface SweetGridProps {
   sweets: Sweet[];
-  onPurchase: (sweetId: number) => void;
+  onPurchase: (sweetId: number, quantity: number) => void;
   onUpdateQuantity: (sweetId: number, newQuantity: number) => void;
   onEdit: (sweet: Sweet) => void;
   onDelete: (sweetId: number) => void;

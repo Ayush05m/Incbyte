@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ShoppingCart, Package, Plus, Minus, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { Sweet } from '@/types/sweet.types';
 import { Button } from '@/components/ui/button';
@@ -6,10 +6,11 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/store/authStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 
 interface SweetCardProps {
   sweet: Sweet;
-  onPurchase: (sweetId: number) => void;
+  onPurchase: (sweetId: number, quantity: number) => void;
   onUpdateQuantity: (sweetId: number, newQuantity: number) => void;
   onEdit: (sweet: Sweet) => void;
   onDelete: (sweetId: number) => void;
@@ -26,12 +27,27 @@ export const SweetCard: React.FC<SweetCardProps> = ({
 }) => {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
-  const isOutOfStock = sweet.quantity <= 0;
+  const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  
   const displayQuantity = Math.max(0, sweet.quantity);
+  const isOutOfStock = displayQuantity <= 0;
 
   const handleIncrease = () => onUpdateQuantity(sweet.id, sweet.quantity + 1);
   const handleDecrease = () => {
     if (sweet.quantity > 0) onUpdateQuantity(sweet.id, sweet.quantity - 1);
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (isNaN(value)) {
+      setPurchaseQuantity(1);
+    } else if (value > displayQuantity) {
+      setPurchaseQuantity(displayQuantity);
+    } else if (value < 1) {
+      setPurchaseQuantity(1);
+    } else {
+      setPurchaseQuantity(value);
+    }
   };
 
   return (
@@ -96,10 +112,20 @@ export const SweetCard: React.FC<SweetCardProps> = ({
             <Button onClick={handleIncrease} disabled={isLoading} size="icon" variant="outline"><Plus className="w-4 h-4" /></Button>
           </div>
         ) : (
-          <Button onClick={() => onPurchase(sweet.id)} disabled={isOutOfStock || isLoading} size="sm">
-            <ShoppingCart className="w-4 h-4 mr-1" />
-            {isOutOfStock ? 'Out of Stock' : 'Purchase'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="1"
+              max={displayQuantity}
+              value={purchaseQuantity}
+              onChange={handleQuantityChange}
+              className="w-16 h-9 text-center"
+              disabled={isOutOfStock || isLoading}
+            />
+            <Button onClick={() => onPurchase(sweet.id, purchaseQuantity)} disabled={isOutOfStock || isLoading || purchaseQuantity > sweet.quantity} size="sm">
+              <ShoppingCart className="w-4 h-4" />
+            </Button>
+          </div>
         )}
       </CardFooter>
     </Card>
