@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
-const API_BASE_URL = 'http://localhost:3000/api'; // This should be in a .env file
+const API_BASE_URL = 'http://localhost:8001/api'; // This should be in a .env file
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
