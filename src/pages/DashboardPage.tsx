@@ -7,22 +7,22 @@ import { SearchParams, Sweet, CreateSweetDto, UpdateSweetDto } from '@/types/swe
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   PlusCircle, 
-  TrendingUp, 
-  Package, 
-  DollarSign, 
   AlertTriangle,
   RefreshCcw,
   Filter,
   X,
   Sparkles,
-  Heart
+  Heart,
+  BarChart
 } from 'lucide-react';
 import { SweetFormDialog } from '@/components/sweets/SweetFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { StatsDrawer } from '@/components/dashboard/StatsDrawer';
+import { Package } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -32,7 +32,7 @@ const DashboardPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSweet, setEditingSweet] = useState<Sweet | null>(null);
   const [sweetToDelete, setSweetToDelete] = useState<Sweet | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [isStatsDrawerOpen, setIsStatsDrawerOpen] = useState(false);
 
   const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
   const updateQuantityMutation = useUpdateSweetQuantity(searchParams);
@@ -48,7 +48,7 @@ const DashboardPage: React.FC = () => {
     const totalValue = sweets.reduce((sum, sweet) => sum + (sweet.price * sweet.quantity), 0);
     const lowStockItems = sweets.filter(sweet => sweet.quantity < 10).length;
     const categories = [...new Set(sweets.map(sweet => sweet.category))].length;
-    const averagePrice = sweets.reduce((sum, sweet) => sum + sweet.price, 0) / totalSweets;
+    const averagePrice = totalSweets > 0 ? sweets.reduce((sum, sweet) => sum + sweet.price, 0) / totalSweets : 0;
 
     return {
       totalSweets,
@@ -174,85 +174,26 @@ const DashboardPage: React.FC = () => {
               </Button>
             )}
             {isAdmin && (
-              <Button 
-                onClick={handleOpenAddForm}
-                className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
-              >
-                <PlusCircle className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-                Add New Sweet
-              </Button>
+              <>
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsStatsDrawerOpen(true)}
+                  className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 border-purple-200 hover:bg-purple-50"
+                >
+                  <BarChart className="h-4 w-4" />
+                  View Analytics
+                </Button>
+                <Button 
+                  onClick={handleOpenAddForm}
+                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                  Add New Sweet
+                </Button>
+              </>
             )}
           </div>
         </div>
-
-        {/* Enhanced Statistics Cards - Admin Only */}
-        {isAdmin && stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-            {[
-              {
-                title: 'Total Sweets',
-                value: stats.totalSweets,
-                subtitle: `${stats.categories} categories`,
-                icon: Package,
-                color: 'blue',
-                gradient: 'from-blue-500 to-cyan-500'
-              },
-              {
-                title: 'Inventory Value',
-                value: `$${stats.totalValue.toFixed(2)}`,
-                subtitle: `Avg: $${stats.averagePrice.toFixed(2)}`,
-                icon: DollarSign,
-                color: 'green',
-                gradient: 'from-green-500 to-emerald-500'
-              },
-              {
-                title: 'Low Stock',
-                value: stats.lowStockItems,
-                subtitle: 'Items below 10 units',
-                icon: AlertTriangle,
-                color: 'yellow',
-                gradient: 'from-yellow-500 to-orange-500'
-              },
-              {
-                title: 'Categories',
-                value: stats.categories,
-                subtitle: 'Unique varieties',
-                icon: TrendingUp,
-                color: 'purple',
-                gradient: 'from-purple-500 to-pink-500'
-              },
-              {
-                title: 'Status',
-                value: isMutating ? 'Updating...' : 'Active',
-                subtitle: 'System status',
-                icon: RefreshCcw,
-                color: 'gray',
-                gradient: 'from-gray-500 to-slate-500'
-              }
-            ].map((stat, index) => (
-              <Card 
-                key={stat.title}
-                className="border-0 shadow-lg bg-white/90 backdrop-blur-sm hover:shadow-xl transition-all duration-300 hover:scale-105 animate-fade-in-up group"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-700">{stat.title}</CardTitle>
-                  <div className={`p-2 rounded-lg bg-gradient-to-r ${stat.gradient} group-hover:scale-110 transition-transform duration-300`}>
-                    <stat.icon className="h-4 w-4 text-white" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-2xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
-                    {stat.value}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {stat.subtitle}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
 
         {/* Enhanced Search and Filter Section */}
         <Card className="mb-6 border-0 shadow-xl bg-white/95 backdrop-blur-sm animate-slide-in-up">
@@ -427,6 +368,16 @@ const DashboardPage: React.FC = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Stats Drawer */}
+        {isAdmin && (
+          <StatsDrawer
+            stats={stats}
+            isMutating={isMutating}
+            isOpen={isStatsDrawerOpen}
+            onOpenChange={setIsStatsDrawerOpen}
+          />
+        )}
       </div>
     </div>
   );
