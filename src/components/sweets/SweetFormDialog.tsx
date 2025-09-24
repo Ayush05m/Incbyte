@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const sweetSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
@@ -16,7 +17,7 @@ const sweetSchema = z.object({
   price: z.coerce.number().min(0.01, 'Price must be positive'),
   quantity: z.coerce.number().int().min(0, 'Quantity cannot be negative'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  imageUrl: z.string().url('Must be a valid URL'),
+  imageUrl: z.string().url('Must be a valid URL').min(1, 'Image is required'),
 });
 
 interface SweetFormDialogProps {
@@ -28,7 +29,7 @@ interface SweetFormDialogProps {
 }
 
 export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClose, onSubmit, sweet, isSubmitting }) => {
-  const { register, handleSubmit, formState: { errors }, control, reset } = useForm<CreateSweetDto>({
+  const { register, handleSubmit, formState: { errors }, control, reset, setValue, watch } = useForm<CreateSweetDto>({
     resolver: zodResolver(sweetSchema),
     defaultValues: sweet || {
       name: '',
@@ -40,6 +41,8 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
     },
   });
 
+  const imageUrl = watch('imageUrl');
+
   React.useEffect(() => {
     if (isOpen) {
       if (sweet) {
@@ -49,6 +52,14 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
       }
     }
   }, [sweet, isOpen, reset]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const newImageUrl = URL.createObjectURL(file);
+      setValue('imageUrl', newImageUrl, { shouldValidate: true });
+    }
+  };
 
   const handleFormSubmit = (data: CreateSweetDto) => {
     onSubmit(data);
@@ -104,11 +115,39 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
             <Textarea id="description" {...register('description')} />
             {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
           </div>
+          
           <div>
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input id="imageUrl" {...register('imageUrl')} />
+            <Label>Image</Label>
+            <Tabs defaultValue="url" className="w-full mt-1">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="url">URL</TabsTrigger>
+                <TabsTrigger value="upload">Upload</TabsTrigger>
+              </TabsList>
+              <TabsContent value="url" className="pt-2">
+                <Input
+                  id="imageUrl"
+                  placeholder="https://example.com/image.png"
+                  {...register('imageUrl')}
+                />
+              </TabsContent>
+              <TabsContent value="upload" className="pt-2">
+                <Input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </TabsContent>
+            </Tabs>
             {errors.imageUrl && <p className="text-red-500 text-sm mt-1">{errors.imageUrl.message}</p>}
+            {imageUrl && (
+              <div className="mt-4">
+                <p className="text-sm font-medium mb-2">Image Preview:</p>
+                <img src={imageUrl} alt="Preview" className="rounded-md object-cover h-32 w-full border" />
+              </div>
+            )}
           </div>
+
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>
