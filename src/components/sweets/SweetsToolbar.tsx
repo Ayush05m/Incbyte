@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Search, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
 
 interface SweetsToolbarProps {
@@ -37,6 +37,11 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
     setPriceRange([0, MAX_PRICE]);
   };
 
+  const handleCategoryChange = (value: string) => {
+    // If the user selects 'all', we set the category state to an empty string to clear the filter.
+    setCategory(value === 'all' ? '' : value);
+  };
+
   return (
     <div className="p-4 bg-card rounded-lg border space-y-4 md:space-y-0 md:flex md:items-center md:justify-between md:gap-4">
       <div className="flex-grow">
@@ -49,12 +54,12 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
         />
       </div>
       <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-        <Select value={category} onValueChange={setCategory}>
+        <Select value={category || 'all'} onValueChange={handleCategoryChange}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             {CATEGORIES.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
           </SelectContent>
         </Select>
