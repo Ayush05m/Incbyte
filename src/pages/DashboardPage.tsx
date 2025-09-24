@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useSweets, usePurchaseSweet, useUpdateSweetQuantity, useAddSweet, useUpdateSweet, useDeleteSweet } from '@/hooks/useSweets';
 import { SweetGrid } from '@/components/sweets/SweetGrid';
 import { SweetsToolbar } from '@/components/sweets/SweetsToolbar';
@@ -58,7 +58,7 @@ const DashboardPage: React.FC = () => {
     };
   }, [sweets]);
 
-  const handleSearch = (params: SearchParams) => setSearchParams(params);
+  const handleSearch = useCallback((params: SearchParams) => setSearchParams(params), []);
   
   const handlePurchase = async (sweetId: number, quantity: number) => {
     const sweet = sweets?.find(s => s.id === sweetId);
