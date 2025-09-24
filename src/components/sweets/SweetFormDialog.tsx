@@ -16,9 +16,11 @@ const sweetSchema = z.object({
   category: z.string().min(1, 'Category is required'),
   price: z.coerce.number().min(0.01, 'Price must be positive'),
   quantity: z.coerce.number().int().min(0, 'Quantity cannot be negative'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  imageUrl: z.string().url('Must be a valid URL').min(1, 'Image is required'),
+  description: z.string().min(10, 'Description must be at least 10 characters').nullable(),
+  imageUrl: z.string().url('Must be a valid URL').or(z.string().startsWith('blob:')).nullable(),
 });
+
+type SweetFormData = z.infer<typeof sweetSchema>;
 
 interface SweetFormDialogProps {
   isOpen: boolean;
@@ -29,16 +31,8 @@ interface SweetFormDialogProps {
 }
 
 export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClose, onSubmit, sweet, isSubmitting }) => {
-  const { register, handleSubmit, formState: { errors }, control, reset, setValue, watch } = useForm<CreateSweetDto>({
+  const { register, handleSubmit, formState: { errors }, control, reset, setValue, watch } = useForm<SweetFormData>({
     resolver: zodResolver(sweetSchema),
-    defaultValues: sweet || {
-      name: '',
-      category: '',
-      price: 0,
-      quantity: 0,
-      description: '',
-      imageUrl: '',
-    },
   });
 
   const imageUrl = watch('imageUrl');
@@ -48,7 +42,7 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
       if (sweet) {
         reset(sweet);
       } else {
-        reset({ name: '', category: '', price: 0, quantity: 0, description: '', imageUrl: '' });
+        reset({ name: '', category: '', price: 0, quantity: 0, description: null, imageUrl: null });
       }
     }
   }, [sweet, isOpen, reset]);
@@ -61,7 +55,7 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
     }
   };
 
-  const handleFormSubmit = (data: CreateSweetDto) => {
+  const handleFormSubmit = (data: SweetFormData) => {
     onSubmit(data);
   };
 

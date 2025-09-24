@@ -19,7 +19,7 @@ const DashboardPage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSweet, setEditingSweet] = useState<Sweet | null>(null);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [deletingSweetId, setDeletingSweetId] = useState<string | null>(null);
+  const [deletingSweetId, setDeletingSweetId] = useState<number | null>(null);
 
   const { data: sweets, isLoading, error } = useSweets(searchParams);
   const purchaseMutation = usePurchaseSweet();
@@ -29,14 +29,14 @@ const DashboardPage: React.FC = () => {
   const deleteSweetMutation = useDeleteSweet();
 
   const handleSearch = (params: SearchParams) => setSearchParams(params);
-  const handlePurchase = async (sweetId: string) => {
+  const handlePurchase = async (sweetId: number) => {
     toast.promise(purchaseMutation.mutateAsync({ sweetId, quantity: 1 }), {
       loading: 'Processing purchase...',
       success: 'Purchase successful!',
       error: 'Purchase failed. Please try again.',
     });
   };
-  const handleUpdateQuantity = (sweetId: string, newQuantity: number) => {
+  const handleUpdateQuantity = (sweetId: number, newQuantity: number) => {
     updateQuantityMutation.mutate({ sweetId, newQuantity });
   };
   
@@ -51,20 +51,28 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleFormSubmit = async (data: CreateSweetDto | UpdateSweetDto) => {
-    const action = editingSweet
-      ? updateSweetMutation.mutateAsync({ sweetId: editingSweet.id, sweetData: data })
-      : addSweetMutation.mutateAsync(data as CreateSweetDto);
-
-    toast.promise(action, {
-      loading: 'Saving sweet...',
-      success: `Sweet ${editingSweet ? 'updated' : 'added'} successfully!`,
-      error: `Failed to save sweet.`,
-    });
-    
-    action.then(() => setIsFormOpen(false));
+    if (!editingSweet) {
+      // This is a new sweet
+      const action = addSweetMutation.mutateAsync(data as CreateSweetDto);
+      toast.promise(action, {
+        loading: 'Adding sweet...',
+        success: `Sweet added successfully!`,
+        error: `Failed to add sweet.`,
+      });
+      action.then(() => setIsFormOpen(false));
+    } else {
+      // This is an existing sweet
+      const action = updateSweetMutation.mutateAsync({ sweetId: editingSweet.id, sweetData: data });
+      toast.promise(action, {
+        loading: 'Updating sweet...',
+        success: `Sweet updated successfully!`,
+        error: `Failed to update sweet.`,
+      });
+      action.then(() => setIsFormOpen(false));
+    }
   };
 
-  const handleOpenDeleteAlert = (sweetId: string) => {
+  const handleOpenDeleteAlert = (sweetId: number) => {
     setDeletingSweetId(sweetId);
     setIsAlertOpen(true);
   };

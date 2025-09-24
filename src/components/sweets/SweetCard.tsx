@@ -9,10 +9,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 interface SweetCardProps {
   sweet: Sweet;
-  onPurchase: (sweetId: string) => void;
-  onUpdateQuantity: (sweetId: string, newQuantity: number) => void;
+  onPurchase: (sweetId: number) => void;
+  onUpdateQuantity: (sweetId: number, newQuantity: number) => void;
   onEdit: (sweet: Sweet) => void;
-  onDelete: (sweetId: string) => void;
+  onDelete: (sweetId: number) => void;
   isLoading?: boolean;
 }
 

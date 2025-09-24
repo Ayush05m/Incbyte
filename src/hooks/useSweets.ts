@@ -23,7 +23,7 @@ export const useAddSweet = () => {
 export const useUpdateSweet = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ sweetId, sweetData }: { sweetId: string; sweetData: UpdateSweetDto }) =>
+    mutationFn: ({ sweetId, sweetData }: { sweetId: number; sweetData: UpdateSweetDto }) =>
       sweetsService.updateSweet(sweetId, sweetData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
@@ -34,7 +34,7 @@ export const useUpdateSweet = () => {
 export const useDeleteSweet = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (sweetId: string) => sweetsService.deleteSweet(sweetId),
+    mutationFn: (sweetId: number) => sweetsService.deleteSweet(sweetId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
     },
@@ -44,7 +44,7 @@ export const useDeleteSweet = () => {
 export const usePurchaseSweet = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ sweetId, quantity }: { sweetId: string; quantity: number }) =>
+    mutationFn: ({ sweetId, quantity }: { sweetId: number; quantity: number }) =>
       sweetsService.purchaseSweet(sweetId, quantity),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
@@ -55,7 +55,7 @@ export const usePurchaseSweet = () => {
 export const useUpdateSweetQuantity = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ sweetId, newQuantity }: { sweetId: string; newQuantity: number }) =>
+    mutationFn: ({ sweetId, newQuantity }: { sweetId: number; newQuantity: number }) =>
       sweetsService.updateSweetQuantity(sweetId, newQuantity),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
