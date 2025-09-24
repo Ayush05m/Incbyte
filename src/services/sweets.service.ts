@@ -21,12 +21,13 @@ export const sweetsService = {
   },
 
   addSweet: async (sweetData: CreateSweetDto): Promise<Sweet> => {
+    console.log(sweetData);
     const response = await api.post('/sweets/', sweetData);
     return response.data;
   },
 
   updateSweet: async (sweetId: number, sweetData: UpdateSweetDto): Promise<Sweet> => {
-    const response = await api.patch(`/sweets/${sweetId}`, sweetData);
+    const response = await api.put(`/sweets/${sweetId}`, sweetData);
     return response.data;
   },
 

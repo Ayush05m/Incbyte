@@ -47,7 +47,7 @@ const DashboardPage: React.FC = () => {
     const totalValue = sweets.reduce((sum, sweet) => sum + (sweet.price * sweet.quantity), 0);
     const lowStockItems = sweets.filter(sweet => sweet.quantity < 10).length;
     const categories = [...new Set(sweets.map(sweet => sweet.category))].length;
-    const averagePrice = sweets.reduce((sum, sweet) => sum + sweet.price, 0) / totalSweets;
+    const averagePrice = totalSweets > 0 ? sweets.reduce((sum, sweet) => sum + sweet.price, 0) / totalSweets : 0;
 
     return {
       totalSweets,
@@ -198,10 +198,10 @@ const DashboardPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  ${stats.totalValue.toFixed(2)}
+                  ₹{stats.totalValue.toLocaleString('en-IN')}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Avg: ${stats.averagePrice.toFixed(2)}
+                  Avg: ₹{stats.averagePrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </CardContent>
             </Card>

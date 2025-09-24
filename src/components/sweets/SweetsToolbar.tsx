@@ -14,11 +14,11 @@ interface SweetsToolbarProps {
 }
 
 const CATEGORIES = ["Cakes", "Pastries", "Candies", "Frozen"];
-const MAX_PRICE = 50;
+const MAX_PRICE = 5000;
 const PRESET_RANGES = [
-  { label: "Budget", range: [0, 10] as [number, number] },
-  { label: "Mid-range", range: [10, 25] as [number, number] },
-  { label: "Premium", range: [25, 50] as [number, number] }
+  { label: "Budget", range: [0, 500] as [number, number] },
+  { label: "Mid-range", range: [500, 2000] as [number, number] },
+  { label: "Premium", range: [2000, 5000] as [number, number] }
 ];
 
 export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) => {
@@ -155,7 +155,7 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4 text-green-600" />
                 <label className="text-sm font-semibold text-gray-700">
-                  Price Range: ${priceRange[0]} - ${priceRange[1]}
+                  Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}
                 </label>
                 {(priceRange[0] > 0 || priceRange[1] < MAX_PRICE) && (
                   <Badge variant="outline" className="bg-green-100 text-green-800">
@@ -179,7 +179,7 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
                     }
                   >
                     <TrendingUp className="h-3 w-3 mr-1" />
-                    {preset.label} (${preset.range[0]}-${preset.range[1]})
+                    {preset.label} (₹{preset.range[0]}-₹{preset.range[1]})
                   </Button>
                 ))}
               </div>
@@ -195,8 +195,8 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>$0</span>
-                  <span>${MAX_PRICE}</span>
+                  <span>₹0</span>
+                  <span>₹{MAX_PRICE}</span>
                 </div>
               </div>
             </div>
@@ -222,7 +222,7 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
                     )}
                     {(priceRange[0] > 0 || priceRange[1] < MAX_PRICE) && (
                       <Badge variant="outline" className="bg-green-50 text-green-700">
-                        Price: ${priceRange[0]}-${priceRange[1]}
+                        Price: ₹{priceRange[0]}-₹{priceRange[1]}
                       </Badge>
                     )}
                   </div>

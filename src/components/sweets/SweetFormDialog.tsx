@@ -15,7 +15,7 @@ import { X } from 'lucide-react';
 const sweetSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   category: z.string().min(1, 'Category is required'),
-  price: z.coerce.number().min(0.01, 'Price must be positive'),
+  price: z.coerce.number().int().min(1, 'Price must be at least ₹1'),
   quantity: z.coerce.number().int().min(0, 'Quantity cannot be negative'),
   description: z.string().min(10, 'Description must be at least 10 characters').nullable(),
   imageUrl: z.string().url('Must be a valid URL').or(z.string().startsWith('blob:')).nullable(),
@@ -43,7 +43,7 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
       if (sweet) {
         reset(sweet);
       } else {
-        reset({ name: '', category: '', price: 0, quantity: 0, description: null, imageUrl: null });
+        reset({ name: '', category: '', price: 1, quantity: 0, description: null, imageUrl: null });
       }
     }
   }, [sweet, isOpen, reset]);
@@ -96,8 +96,8 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
                 {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
               </div>
               <div>
-                <Label htmlFor="price">Price</Label>
-                <Input id="price" type="number" step="0.01" {...register('price')} />
+                <Label htmlFor="price">Price (₹)</Label>
+                <Input id="price" type="number" step="1" {...register('price')} />
                 {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>}
               </div>
             </div>

@@ -90,7 +90,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({
       <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle className="text-lg">{sweet.name}</CardTitle>
-          <span className="text-lg font-bold text-primary-600">${sweet.price.toFixed(2)}</span>
+          <span className="text-lg font-bold text-primary-600">₹{sweet.price.toLocaleString('en-IN')}</span>
         </div>
         <Badge variant="secondary">{sweet.category}</Badge>
       </CardHeader>
