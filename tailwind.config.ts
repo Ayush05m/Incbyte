@@ -27,6 +27,10 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          '50': '#fdf2f8',
+          '500': '#ec4899',
+          '600': '#db2777',
+          '700': '#be185d',
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -62,11 +66,20 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        sweet: {
+          candy: '#ff6b9d',
+          chocolate: '#8b4513',
+          mint: '#98fb98',
+          vanilla: '#f3e5ab',
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
