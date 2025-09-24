@@ -108,14 +108,15 @@ const DashboardPage: React.FC = () => {
     setRestockingSweet(sweet);
   };
 
-  const handleRestockSubmit = (newQuantity: number) => {
+  const handleRestockSubmit = (quantityToAdd: number) => {
     if (!restockingSweet) return;
 
+    const newQuantity = restockingSweet.quantity + quantityToAdd;
     const promise = updateQuantityMutation.mutateAsync({ sweetId: restockingSweet.id, newQuantity });
 
     toast.promise(promise, {
       loading: 'Updating quantity...',
-      success: 'Quantity updated successfully!',
+      success: `Successfully added ${quantityToAdd} units. New total is ${newQuantity}.`,
       error: (err: any) => err?.response?.data?.message || 'Failed to update quantity.',
     });
 

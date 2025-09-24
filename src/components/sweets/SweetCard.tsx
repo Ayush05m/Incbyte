@@ -153,14 +153,15 @@ export const SweetCard: React.FC<SweetCardProps> = ({
         
         <CardFooter className="pt-3 border-t border-gray-100">
           {isAdmin ? (
-            <div className="flex items-center text-sm text-gray-600 w-full">
-              <Package className="w-4 h-4 mr-2" />
-              <span>{displayQuantity} units in stock</span>
-              {isLowStock && !isOutOfStock && (
-                <Badge variant="outline" className="ml-auto bg-yellow-100 text-yellow-800 border-yellow-200">
-                  Low Stock
-                </Badge>
-              )}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center text-sm text-gray-600">
+                <Package className="w-4 h-4 mr-2" />
+                <span>{displayQuantity} units in stock</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => onRestock(sweet)}>
+                <PackagePlus className="w-4 h-4 mr-2" />
+                Restock
+              </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2 w-full">

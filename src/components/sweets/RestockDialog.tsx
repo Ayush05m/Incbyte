@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 
 const restockSchema = z.object({
-  quantity: z.coerce.number().int().min(0, 'Quantity cannot be negative'),
+  quantityToAdd: z.coerce.number().int().min(1, 'Must add at least 1 unit'),
 });
 
 type RestockFormData = z.infer<typeof restockSchema>;
@@ -17,7 +17,7 @@ type RestockFormData = z.infer<typeof restockSchema>;
 interface RestockDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (newQuantity: number) => void;
+  onSubmit: (quantityToAdd: number) => void;
   sweet: Sweet | null;
   isSubmitting?: boolean;
 }
@@ -28,13 +28,13 @@ export const RestockDialog: React.FC<RestockDialogProps> = ({ isOpen, onClose, o
   });
 
   React.useEffect(() => {
-    if (sweet) {
-      reset({ quantity: sweet.quantity });
+    if (isOpen) {
+      reset({ quantityToAdd: 1 });
     }
-  }, [sweet, reset]);
+  }, [isOpen, reset]);
 
   const handleFormSubmit = (data: RestockFormData) => {
-    onSubmit(data.quantity);
+    onSubmit(data.quantityToAdd);
   };
 
   if (!sweet) return null;
@@ -43,23 +43,23 @@ export const RestockDialog: React.FC<RestockDialogProps> = ({ isOpen, onClose, o
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Restock "{sweet.name}"</DialogTitle>
+          <DialogTitle>Add Stock to "{sweet.name}"</DialogTitle>
           <DialogDescription>
-            Current stock is {sweet.quantity}. Set the new total quantity for this item.
+            Current stock is {sweet.quantity}. Enter the number of units you want to add.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(handleFormSubmit)}>
           <div className="py-4">
             <div>
-              <Label htmlFor="quantity">New Quantity</Label>
-              <Input id="quantity" type="number" {...register('quantity')} />
-              {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity.message}</p>}
+              <Label htmlFor="quantityToAdd">Quantity to Add</Label>
+              <Input id="quantityToAdd" type="number" {...register('quantityToAdd')} placeholder="e.g., 50" />
+              {errors.quantityToAdd && <p className="text-red-500 text-sm mt-1">{errors.quantityToAdd.message}</p>}
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Quantity'}
+              {isSubmitting ? 'Adding...' : 'Add Stock'}
             </Button>
           </DialogFooter>
         </form>
