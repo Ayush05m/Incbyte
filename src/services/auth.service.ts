@@ -26,14 +26,8 @@ const authenticateAndFetchUser = async (authPromise: Promise<any>): Promise<{ us
 
 export const authService = {
   login: async (email: string, password: string): Promise<{ user: User; token: string }> => {
-    // Backend expects form data for the token endpoint
-    const formData = new FormData();
-    formData.append('username', email);
-    formData.append('password', password);
-
-    const authPromise = api.post('/auth/token', formData, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
+    // The backend's /auth/login endpoint expects a JSON body with email and password.
+    const authPromise = api.post('/auth/login', { email, password });
     
     return authenticateAndFetchUser(authPromise);
   },
