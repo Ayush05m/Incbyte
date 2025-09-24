@@ -6,12 +6,14 @@ interface SweetGridProps {
   sweets: Sweet[];
   onPurchase: (sweetId: string) => void;
   onUpdateQuantity: (sweetId: string, newQuantity: number) => void;
+  onEdit: (sweet: Sweet) => void;
+  onDelete: (sweetId: string) => void;
   isLoading?: boolean;
 }
 
-export const SweetGrid: React.FC<SweetGridProps> = ({ sweets, onPurchase, onUpdateQuantity, isLoading }) => {
+export const SweetGrid: React.FC<SweetGridProps> = ({ sweets, onPurchase, onUpdateQuantity, onEdit, onDelete, isLoading }) => {
   if (sweets.length === 0) {
-    return <p className="text-center text-gray-500">No sweets available at the moment.</p>;
+    return <p className="text-center text-gray-500 py-10">No sweets match your criteria.</p>;
   }
 
   return (
@@ -22,6 +24,8 @@ export const SweetGrid: React.FC<SweetGridProps> = ({ sweets, onPurchase, onUpda
           sweet={sweet} 
           onPurchase={onPurchase}
           onUpdateQuantity={onUpdateQuantity}
+          onEdit={onEdit}
+          onDelete={onDelete}
           isLoading={isLoading} 
         />
       ))}

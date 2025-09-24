@@ -1,6 +1,7 @@
-import { Sweet, SearchParams } from '@/types/sweet.types';
+import { Sweet, SearchParams, CreateSweetDto, UpdateSweetDto } from '@/types/sweet.types';
+import { v4 as uuidv4 } from 'uuid';
 
-const mockSweets: Sweet[] = [
+let mockSweets: Sweet[] = [
   { id: '1', name: 'Chocolate Fudge Cake', category: 'Cakes', price: 25.99, quantity: 10, description: 'Rich and decadent chocolate fudge cake.', imageUrl: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=400' },
   { id: '2', name: 'Rainbow Macarons', category: 'Pastries', price: 12.50, quantity: 25, description: 'A colorful assortment of almond meringue cookies.', imageUrl: 'https://images.unsplash.com/photo-1558326567-98ae2405596b?q=80&w=400' },
   { id: '3', name: 'Glazed Doughnuts', category: 'Pastries', price: 8.99, quantity: 30, description: 'Classic, sweet, and fluffy glazed doughnuts.', imageUrl: 'https://images.unsplash.com/photo-1551024601-bec78d8d590d?q=80&w=400' },
@@ -11,24 +12,53 @@ const mockSweets: Sweet[] = [
 
 export const sweetsService = {
   getSweets: async (params?: SearchParams): Promise<Sweet[]> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    let sweets = mockSweets;
+    await new Promise(resolve => setTimeout(resolve, 300));
+    let sweets = [...mockSweets];
     if (params?.query) {
-        sweets = sweets.filter(s => s.name.toLowerCase().includes(params.query!.toLowerCase()));
+      sweets = sweets.filter(s => s.name.toLowerCase().includes(params.query!.toLowerCase()));
+    }
+    if (params?.category) {
+      sweets = sweets.filter(s => s.category === params.category);
+    }
+    if (params?.priceRange) {
+      sweets = sweets.filter(s => s.price >= params.priceRange![0] && s.price <= params.priceRange![1]);
     }
     return sweets;
   },
+  
+  addSweet: async (sweetData: CreateSweetDto): Promise<Sweet> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const newSweet: Sweet = { ...sweetData, id: uuidv4() };
+    mockSweets.unshift(newSweet);
+    return newSweet;
+  },
+
+  updateSweet: async (sweetId: string, sweetData: UpdateSweetDto): Promise<Sweet> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = mockSweets.findIndex(s => s.id === sweetId);
+    if (index === -1) throw new Error("Sweet not found");
+    mockSweets[index] = { ...mockSweets[index], ...sweetData };
+    return mockSweets[index];
+  },
+
+  deleteSweet: async (sweetId: string): Promise<{ success: boolean }> => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const initialLength = mockSweets.length;
+    mockSweets = mockSweets.filter(s => s.id !== sweetId);
+    if (mockSweets.length === initialLength) throw new Error("Sweet not found");
+    return { success: true };
+  },
+
   purchaseSweet: async (sweetId: string, quantity: number): Promise<{ success: boolean }> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     console.log(`Purchased ${quantity} of sweet ${sweetId}`);
     return { success: true };
   },
+
   updateSweetQuantity: async (sweetId: string, newQuantity: number): Promise<Sweet> => {
     await new Promise(resolve => setTimeout(resolve, 100));
     const sweetIndex = mockSweets.findIndex(s => s.id === sweetId);
-    if (sweetIndex === -1) {
-      throw new Error("Sweet not found");
-    }
+    if (sweetIndex === -1) throw new Error("Sweet not found");
     mockSweets[sweetIndex].quantity = newQuantity;
     return mockSweets[sweetIndex];
   }

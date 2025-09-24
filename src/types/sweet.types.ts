@@ -9,8 +9,10 @@ export interface Sweet {
 }
 
 export interface CreateSweetDto extends Omit<Sweet, 'id'> {}
+export type UpdateSweetDto = Partial<CreateSweetDto>;
 
 export interface SearchParams {
   query?: string;
   category?: string;
+  priceRange?: [number, number];
 }
