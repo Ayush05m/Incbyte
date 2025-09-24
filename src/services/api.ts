@@ -22,7 +22,15 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // The backend wraps successful responses in a standard format.
+    // We can unwrap the actual data here to simplify the code in our services.
+    if (response.data && response.data.success === true && response.data.data !== undefined) {
+      // Replace the wrapped response with the actual data
+      response.data = response.data.data;
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();

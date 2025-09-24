@@ -6,7 +6,7 @@ const authenticateAndFetchUser = async (authPromise: Promise<any>): Promise<{ us
   // Step 1: Get the token from the auth endpoint
   const authResponse = await authPromise;
   const token = authResponse.data.access_token;
-
+  console.log(authPromise);
   if (!token) {
     throw new Error("Authentication failed: No token received from the server.");
   }
@@ -28,7 +28,7 @@ export const authService = {
   login: async (email: string, password: string): Promise<{ user: User; token: string }> => {
     // The backend's /auth/login endpoint expects a JSON body with email and password.
     const authPromise = api.post('/auth/login', { email, password });
-    
+
     return authenticateAndFetchUser(authPromise);
   },
   register: async (data: {

@@ -38,6 +38,7 @@ export const LoginForm: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await authService.login(data.email, data.password);
+      console.log(response);
       login(response.user, response.token);
       toast.success("Login successful!");
       navigate(from, { replace: true });
