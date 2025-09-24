@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { useSweets, useUpdateSweetQuantity, useAddSweet, useUpdateSweet, useDeleteSweet } from '@/hooks/useSweets';
+import { useSweets, useAddSweet, useUpdateSweet, useDeleteSweet, useRestockSweet } from '@/hooks/useSweets';
 import { SweetGrid } from '@/components/sweets/SweetGrid';
 import { SweetsToolbar } from '@/components/sweets/SweetsToolbar';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -38,10 +38,10 @@ const DashboardPage: React.FC = () => {
   const [isStatsDrawerOpen, setIsStatsDrawerOpen] = useState(false);
 
   const { data: sweets, isLoading, error, refetch } = useSweets(searchParams);
-  const updateQuantityMutation = useUpdateSweetQuantity(searchParams);
   const addSweetMutation = useAddSweet();
   const updateSweetMutation = useUpdateSweet();
   const deleteSweetMutation = useDeleteSweet();
+  const restockMutation = useRestockSweet();
 
   const stats = useMemo(() => {
     if (!sweets?.length) return null;
@@ -113,13 +113,12 @@ const DashboardPage: React.FC = () => {
   const handleRestockSubmit = (quantityToAdd: number) => {
     if (!restockingSweet) return;
 
-    const newQuantity = restockingSweet.quantity + quantityToAdd;
-    const promise = updateQuantityMutation.mutateAsync({ sweetId: restockingSweet.id, newQuantity });
+    const promise = restockMutation.mutateAsync({ sweetId: restockingSweet.id, quantity: quantityToAdd });
 
     toast.promise(promise, {
-      loading: 'Updating quantity...',
-      success: `Successfully added ${quantityToAdd} units. New total is ${newQuantity}.`,
-      error: (err: any) => err?.response?.data?.message || 'Failed to update quantity.',
+      loading: 'Restocking sweet...',
+      success: (updatedSweet: Sweet) => `Successfully added ${quantityToAdd} units. New total is ${updatedSweet.quantity}.`,
+      error: (err: any) => err?.response?.data?.message || 'Failed to restock sweet.',
     });
 
     promise.then(() => setRestockingSweet(null)).catch(() => {});
@@ -130,7 +129,7 @@ const DashboardPage: React.FC = () => {
     toast.success('Filters cleared');
   };
 
-  const isMutating = addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending || updateQuantityMutation.isPending;
+  const isMutating = addSweetMutation.isPending || updateSweetMutation.isPending || deleteSweetMutation.isPending || restockMutation.isPending;
   const isFiltered = Object.keys(searchParams).length > 0;
 
   return (
@@ -332,7 +331,7 @@ const DashboardPage: React.FC = () => {
             onClose={() => setRestockingSweet(null)}
             onSubmit={handleRestockSubmit}
             sweet={restockingSweet}
-            isSubmitting={updateQuantityMutation.isPending}
+            isSubmitting={restockMutation.isPending}
           />
         )}
 

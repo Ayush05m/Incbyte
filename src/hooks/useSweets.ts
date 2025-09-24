@@ -42,6 +42,17 @@ export const useDeleteSweet = () => {
   });
 };
 
+export const useRestockSweet = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sweetId, quantity }: { sweetId: number; quantity: number }) =>
+      sweetsService.restockSweet(sweetId, quantity),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sweets'] });
+    },
+  });
+};
+
 export const useUpdateSweetQuantity = (searchParams?: SearchParams) => {
   const queryClient = useQueryClient();
   const queryKey = ['sweets', searchParams];

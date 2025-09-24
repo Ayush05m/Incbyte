@@ -40,6 +40,11 @@ export const sweetsService = {
     return response.data;
   },
 
+  restockSweet: async (sweetId: number, quantity: number): Promise<Sweet> => {
+    const response = await api.post(`/sweets/${sweetId}/restock`, { quantity });
+    return response.data;
+  },
+
   updateSweetQuantity: async (sweetId: number, newQuantity: number): Promise<Sweet> => {
     const response = await api.patch(`/sweets/${sweetId}`, { quantity: newQuantity });
     return response.data;
