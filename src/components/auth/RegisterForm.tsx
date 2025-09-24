@@ -8,9 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from "sonner";
 import { useNavigate } from 'react-router-dom';
-import { UserCreate } from '@/types/auth.types';
 
-const registerSchema: z.ZodType<UserCreate> = z.object({
+const registerSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
