@@ -47,7 +47,8 @@ export const LoginForm: React.FC = () => {
       toast.success("Login successful!");
       navigate(from, { replace: true });
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Login failed. Please check your connection and try again.';
+      // The backend might send the error message in `message` or `error` property.
+      const message = error.response?.data?.message || error.response?.data?.error || 'Login failed. Please check your credentials and try again.';
       setError('root', { message });
       toast.error(message);
     }
@@ -61,7 +62,7 @@ export const LoginForm: React.FC = () => {
       toast.success("Logged in as Demo User!");
       navigate(from, { replace: true });
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Demo login failed. Please try again.';
+      const message = error.response?.data?.message || error.response?.data?.error || 'Demo login failed. Please try again.';
       setError('root', { message });
       toast.error(message);
     } finally {

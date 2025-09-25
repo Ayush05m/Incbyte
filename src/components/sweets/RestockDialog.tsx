@@ -46,7 +46,7 @@ const RestockForm: React.FC<{
   setValue: (name: 'quantityToAdd', value: number, options?: { shouldValidate: boolean }) => void;
 }> = ({ sweet, register, errors, quantityToAdd, setValue }) => {
   const quickAddAmounts = [10, 25, 50, 100];
-  const newTotal = sweet.quantity + (isNaN(quantityToAdd) ? 0 : quantityToAdd);
+  const newTotal = Number(sweet.quantity) + Number(isNaN(quantityToAdd) ? 0 : quantityToAdd);
 
   return (
     <div className="py-4 space-y-6">
