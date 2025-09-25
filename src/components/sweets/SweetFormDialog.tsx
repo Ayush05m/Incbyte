@@ -2,7 +2,7 @@ import React from 'react';
 import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Sweet, CreateSweetDto, UpdateSweetDto } from '@/types/sweet.types';
+import { Sweet } from '@/types/sweet.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,15 +17,15 @@ const sweetSchema = z.object({
   price: z.coerce.number().int().min(1, 'Price must be at least ₹1'),
   quantity: z.coerce.number().int().min(0, 'Quantity cannot be negative'),
   description: z.string().min(10, 'Description must be at least 10 characters').nullable(),
-  imageUrl: z.string().url('Must be a valid URL').or(z.string().startsWith('blob:')).nullable(),
+  imageUrl: z.any().nullable(),
 });
 
-type SweetFormData = z.infer<typeof sweetSchema>;
+export type SweetFormData = z.infer<typeof sweetSchema>;
 
 interface SweetFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateSweetDto | UpdateSweetDto) => void;
+  onSubmit: (data: SweetFormData) => void;
   sweet?: Sweet | null;
   isSubmitting?: boolean;
 }
@@ -57,24 +57,38 @@ const useSweetForm = (sweet: Sweet | null, isOpen: boolean) => {
 };
 
 const ImageUploadSection: React.FC<{
-  imageUrl: string | null;
-  setValue: (name: 'imageUrl', value: string | null, options?: { shouldValidate: boolean }) => void;
-  register: any;
+  imageUrl: File | string | null;
+  setValue: (name: 'imageUrl', value: any, options?: { shouldValidate: boolean }) => void;
+  control: any;
   errors: any;
-}> = ({ imageUrl, setValue, register, errors }) => {
+}> = ({ imageUrl, setValue, control, errors }) => {
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (imageUrl instanceof File) {
+      const objectUrl = URL.createObjectURL(imageUrl);
+      setPreviewUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else if (typeof imageUrl === 'string') {
+      setPreviewUrl(imageUrl);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [imageUrl]);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setValue('imageUrl', URL.createObjectURL(file), { shouldValidate: true });
+      setValue('imageUrl', file, { shouldValidate: true });
     }
   };
 
   return (
     <div className="space-y-4">
       <Label className="font-semibold">Sweet Image</Label>
-      {imageUrl ? (
+      {previewUrl ? (
         <div className="relative group aspect-square">
-          <img src={imageUrl} alt="Sweet preview" className="rounded-lg object-cover w-full h-full border shadow-sm" />
+          <img src={previewUrl} alt="Sweet preview" className="rounded-lg object-cover w-full h-full border shadow-sm" />
           <Button
             type="button"
             variant="destructive"
@@ -108,15 +122,22 @@ const ImageUploadSection: React.FC<{
       )}
       <div className="relative">
         <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          id="imageUrl"
-          placeholder="Or paste an image URL"
-          {...register('imageUrl')}
-          className="pl-9"
-          aria-invalid={!!errors.imageUrl}
+        <Controller
+          name="imageUrl"
+          control={control}
+          render={({ field }) => (
+            <Input
+              id="imageUrl"
+              placeholder="Or paste an image URL"
+              value={typeof field.value === 'string' ? field.value : ''}
+              onChange={(e) => field.onChange(e.target.value)}
+              className="pl-9"
+              aria-invalid={!!errors.imageUrl}
+            />
+          )}
         />
       </div>
-      {errors.imageUrl && <p className="text-red-500 text-sm mt-1">{errors.imageUrl.message}</p>}
+      {errors.imageUrl && <p className="text-red-500 text-sm mt-1">{typeof errors.imageUrl.message === 'string' ? errors.imageUrl.message : 'Invalid image'}</p>}
     </div>
   );
 };
@@ -217,7 +238,7 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 max-h-[70vh] overflow-y-auto px-1 pr-4">
-            <ImageUploadSection imageUrl={imageUrl} setValue={setValue} register={register} errors={errors} />
+            <ImageUploadSection imageUrl={imageUrl} setValue={setValue} control={control} errors={errors} />
             <FormFieldsSection control={control} register={register} errors={errors} />
           </div>
           <DialogFooter className="pt-4 border-t mt-2">

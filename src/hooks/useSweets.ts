@@ -14,7 +14,7 @@ export const useSweets = (searchParams?: SearchParams) => {
 export const useAddSweet = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (sweetData: CreateSweetDto) => sweetsService.addSweet(sweetData),
+    mutationFn: (sweetData: CreateSweetDto | FormData) => sweetsService.addSweet(sweetData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
     },
@@ -24,7 +24,7 @@ export const useAddSweet = () => {
 export const useUpdateSweet = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ sweetId, sweetData }: { sweetId: number; sweetData: UpdateSweetDto }) =>
+    mutationFn: ({ sweetId, sweetData }: { sweetId: number; sweetData: UpdateSweetDto | FormData }) =>
       sweetsService.updateSweet(sweetId, sweetData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
