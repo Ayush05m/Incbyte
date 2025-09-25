@@ -21,7 +21,7 @@ import {
   Sparkles,
   Heart
 } from 'lucide-react';
-import { SweetFormDialog, SweetFormData } from '@/components/sweets/SweetFormDialog';
+import { SweetFormDialog } from '@/components/sweets/SweetFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { RestockDialog } from '@/components/sweets/RestockDialog';
 import { StatsDrawer } from '@/components/dashboard/StatsDrawer';
@@ -73,30 +73,10 @@ const DashboardPage: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async (data: SweetFormData) => {
-    const { imageUrl, ...sweetDataValues } = data;
-
-    let payload: FormData | CreateSweetDto | UpdateSweetDto;
-
-    if (imageUrl instanceof File) {
-      payload = new FormData();
-      // Append all other form fields to the FormData object
-      for (const key in sweetDataValues) {
-        const value = sweetDataValues[key as keyof typeof sweetDataValues];
-        if (value !== null && value !== undefined) {
-          payload.append(key, String(value));
-        }
-      }
-      // The backend expects the file under the key 'image_file'
-      payload.append('image_file', imageUrl);
-    } else {
-      // No new file uploaded, send as plain JSON
-      payload = { ...sweetDataValues, imageUrl: imageUrl as string | null };
-    }
-
+  const handleFormSubmit = async (data: CreateSweetDto | UpdateSweetDto) => {
     const action = editingSweet
-      ? updateSweetMutation.mutateAsync({ sweetId: editingSweet.id, sweetData: payload })
-      : addSweetMutation.mutateAsync(payload as CreateSweetDto | FormData);
+      ? updateSweetMutation.mutateAsync({ sweetId: editingSweet.id, sweetData: data })
+      : addSweetMutation.mutateAsync(data as CreateSweetDto);
 
     toast.promise(action, {
       loading: editingSweet ? 'Updating sweet...' : 'Adding sweet...',

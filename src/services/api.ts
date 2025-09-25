@@ -5,6 +5,9 @@ const API_BASE_URL = 'http://localhost:8081/api'; // Updated to your live backen
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 api.interceptors.request.use(
@@ -12,11 +15,6 @@ api.interceptors.request.use(
     const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    }
-    // If data is not FormData, set Content-Type to application/json
-    // Axios will automatically set the correct Content-Type for FormData.
-    if (!(config.data instanceof FormData)) {
-      config.headers['Content-Type'] = 'application/json';
     }
     return config;
   },

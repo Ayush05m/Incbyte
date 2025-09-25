@@ -20,19 +20,13 @@ export const sweetsService = {
     return response.data;
   },
 
-  addSweet: async (sweetData: CreateSweetDto | FormData): Promise<Sweet> => {
+  addSweet: async (sweetData: CreateSweetDto): Promise<Sweet> => {
+    console.log(sweetData);
     const response = await api.post('/sweets/', sweetData);
     return response.data;
   },
 
-  updateSweet: async (sweetId: number, sweetData: UpdateSweetDto | FormData): Promise<Sweet> => {
-    // When sending FormData, it's common to use POST for updates to avoid issues with PUT.
-    // We'll append a _method field to signify a PUT request if the backend supports it,
-    // or the backend can have a dedicated POST endpoint for updates.
-    if (sweetData instanceof FormData) {
-      const response = await api.post(`/sweets/${sweetId}`, sweetData);
-      return response.data;
-    }
+  updateSweet: async (sweetId: number, sweetData: UpdateSweetDto): Promise<Sweet> => {
     const response = await api.put(`/sweets/${sweetId}`, sweetData);
     return response.data;
   },
