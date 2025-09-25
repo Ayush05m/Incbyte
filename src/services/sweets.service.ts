@@ -1,5 +1,29 @@
 import { api } from './api';
-import { Sweet, SearchParams, CreateSweetDto, UpdateSweetDto } from '@/types/sweet.types';
+import { Sweet, SearchParams, SweetFormData, UpdateSweetFormData } from '@/types/sweet.types';
+
+const createSweetFormData = (sweetData: SweetFormData | UpdateSweetFormData): FormData => {
+  const formData = new FormData();
+  const data: { [key: string]: any } = { ...sweetData };
+
+  if (data.imageFile instanceof File) {
+    formData.append('image_file', data.imageFile);
+    // Don't send imageUrl, backend will generate it from the file
+    delete data.imageUrl;
+  } else if (data.imageUrl && typeof data.imageUrl === 'string' && data.imageUrl.startsWith('blob:')) {
+    // This is a preview of an image that hasn't changed, so don't send it.
+    delete data.imageUrl;
+  }
+  
+  delete data.imageFile;
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      formData.append(key, String(value));
+    }
+  });
+
+  return formData;
+};
 
 export const sweetsService = {
   getSweets: async (params?: SearchParams): Promise<Sweet[]> => {
@@ -20,14 +44,19 @@ export const sweetsService = {
     return response.data;
   },
 
-  addSweet: async (sweetData: CreateSweetDto): Promise<Sweet> => {
-    console.log(sweetData);
-    const response = await api.post('/sweets/', sweetData);
+  addSweet: async (sweetData: SweetFormData): Promise<Sweet> => {
+    const formData = createSweetFormData(sweetData);
+    const response = await api.post('/sweets/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return response.data;
   },
 
-  updateSweet: async (sweetId: number, sweetData: UpdateSweetDto): Promise<Sweet> => {
-    const response = await api.put(`/sweets/${sweetId}`, sweetData);
+  updateSweet: async (sweetId: number, sweetData: UpdateSweetFormData): Promise<Sweet> => {
+    const formData = createSweetFormData(sweetData);
+    const response = await api.put(`/sweets/${sweetId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return response.data;
   },
 

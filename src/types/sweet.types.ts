@@ -13,36 +13,16 @@ export interface Sweet {
 export interface CreateSweetDto extends Omit<Sweet, 'id' | 'createdAt' | 'updatedAt'> {}
 export type UpdateSweetDto = Partial<CreateSweetDto>;
 
+// This is a new type for the form data, including the optional file
+export interface SweetFormData extends CreateSweetDto {
+  imageFile?: File | null;
+}
+
+// This is for updating with a file
+export type UpdateSweetFormData = Partial<SweetFormData>;
+
 export interface SearchParams {
   query?: string;
   category?: string;
   priceRange?: [number, number];
-}
-
-// Sweet.ts
-export interface Sweet {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-  stock: number;
-  created_at?: string;
-}
-export interface SweetCreate {
-  name: string;
-  category: string;
-  price: number;
-  stock: number;
-}
-export interface SweetUpdate {
-  name?: string;
-  category?: string;
-  price?: number;
-  stock?: number;
-}
-export interface SweetPurchase {
-  quantity: number;
-}
-export interface SweetRestock {
-  quantity: number;
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import { z } from 'zod';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Sweet, CreateSweetDto, UpdateSweetDto } from '@/types/sweet.types';
+import { Sweet, SweetFormData } from '@/types/sweet.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,14 +18,15 @@ const sweetSchema = z.object({
   quantity: z.coerce.number().int().min(0, 'Quantity cannot be negative'),
   description: z.string().min(10, 'Description must be at least 10 characters').nullable(),
   imageUrl: z.string().url('Must be a valid URL').or(z.string().startsWith('blob:')).nullable(),
+  imageFile: z.instanceof(File).optional().nullable(),
 });
 
-type SweetFormData = z.infer<typeof sweetSchema>;
+type SweetFormSchema = z.infer<typeof sweetSchema>;
 
 interface SweetFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateSweetDto | UpdateSweetDto) => void;
+  onSubmit: (data: SweetFormData) => void;
   sweet?: Sweet | null;
   isSubmitting?: boolean;
 }
@@ -33,23 +34,24 @@ interface SweetFormDialogProps {
 const categories = ['Cakes', 'Pastries', 'Candies', 'Frozen'] as const;
 
 const useSweetForm = (sweet: Sweet | null, isOpen: boolean) => {
-  const defaultValues: SweetFormData = {
+  const defaultValues: SweetFormSchema = {
     name: '',
     category: '',
     price: 1,
     quantity: 0,
     description: null,
     imageUrl: null,
+    imageFile: null,
   };
 
-  const form = useForm<SweetFormData>({
+  const form = useForm<SweetFormSchema>({
     resolver: zodResolver(sweetSchema),
     defaultValues,
   });
 
   React.useEffect(() => {
     if (isOpen) {
-      form.reset(sweet || defaultValues);
+      form.reset(sweet ? { ...sweet, imageFile: null } : defaultValues);
     }
   }, [sweet, isOpen, form]);
 
@@ -58,7 +60,7 @@ const useSweetForm = (sweet: Sweet | null, isOpen: boolean) => {
 
 const ImageUploadSection: React.FC<{
   imageUrl: string | null;
-  setValue: (name: 'imageUrl', value: string | null, options?: { shouldValidate: boolean }) => void;
+  setValue: (name: keyof SweetFormSchema, value: any, options?: { shouldValidate: boolean }) => void;
   register: any;
   errors: any;
 }> = ({ imageUrl, setValue, register, errors }) => {
@@ -66,6 +68,7 @@ const ImageUploadSection: React.FC<{
     const file = event.target.files?.[0];
     if (file) {
       setValue('imageUrl', URL.createObjectURL(file), { shouldValidate: true });
+      setValue('imageFile', file);
     }
   };
 
@@ -80,7 +83,10 @@ const ImageUploadSection: React.FC<{
             variant="destructive"
             size="icon"
             className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={() => setValue('imageUrl', null, { shouldValidate: true })}
+            onClick={() => {
+              setValue('imageUrl', null, { shouldValidate: true });
+              setValue('imageFile', null);
+            }}
             aria-label="Remove image"
           >
             <X className="h-4 w-4" />
@@ -111,7 +117,9 @@ const ImageUploadSection: React.FC<{
         <Input
           id="imageUrl"
           placeholder="Or paste an image URL"
-          {...register('imageUrl')}
+          {...register('imageUrl', {
+            onChange: () => setValue('imageFile', null)
+          })}
           className="pl-9"
           aria-invalid={!!errors.imageUrl}
         />
@@ -154,7 +162,7 @@ const FormFieldsSection: React.FC<{
       {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
     </div>
 
-    <div className="grid grid-cols-2 gap-4">
+    <div className="flex gap-4">
       <div>
         <Label htmlFor="price" className="font-semibold">Price (₹)</Label>
         <div className="relative">

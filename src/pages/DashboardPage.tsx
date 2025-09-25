@@ -3,7 +3,7 @@ import { useSweets, useAddSweet, useUpdateSweet, useDeleteSweet, useRestockSweet
 import { SweetGrid } from '@/components/sweets/SweetGrid';
 import { SweetsToolbar } from '@/components/sweets/SweetsToolbar';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { SearchParams, Sweet, CreateSweetDto, UpdateSweetDto } from '@/types/sweet.types';
+import { SearchParams, Sweet, SweetFormData } from '@/types/sweet.types';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -73,18 +73,20 @@ const DashboardPage: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleFormSubmit = async (data: CreateSweetDto | UpdateSweetDto) => {
-    const action = editingSweet
-      ? updateSweetMutation.mutateAsync({ sweetId: editingSweet.id, sweetData: data })
-      : addSweetMutation.mutateAsync(data as CreateSweetDto);
+  const handleFormSubmit = async (data: SweetFormData) => {
+    const isEditing = !!editingSweet;
+    const action = isEditing
+      ? updateSweetMutation.mutateAsync({ sweetId: editingSweet!.id, sweetData: data })
+      : addSweetMutation.mutateAsync(data);
 
     toast.promise(action, {
-      loading: editingSweet ? 'Updating sweet...' : 'Adding sweet...',
-      success: `Sweet ${editingSweet ? 'updated' : 'added'} successfully!`,
-      error: (err: any) => err?.response?.data?.message || `Failed to ${editingSweet ? 'update' : 'add'} sweet.`,
+      loading: isEditing ? 'Updating sweet...' : 'Adding sweet...',
+      success: () => {
+        setIsFormOpen(false);
+        return `Sweet ${isEditing ? 'updated' : 'added'} successfully!`;
+      },
+      error: (err: any) => err?.response?.data?.message || `Failed to ${isEditing ? 'update' : 'add'} sweet.`,
     });
-
-    action.then(() => setIsFormOpen(false)).catch(() => {});
   };
 
   const handleOpenDeleteAlert = (sweetId: number) => {

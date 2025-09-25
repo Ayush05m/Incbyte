@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sweetsService } from '@/services/sweets.service';
-import { CreateSweetDto, SearchParams, Sweet, UpdateSweetDto } from '@/types/sweet.types';
+import { CreateSweetDto, SearchParams, Sweet, UpdateSweetDto, SweetFormData, UpdateSweetFormData } from '@/types/sweet.types';
 import { toast } from 'sonner';
 
 export const useSweets = (searchParams?: SearchParams) => {
@@ -14,7 +14,7 @@ export const useSweets = (searchParams?: SearchParams) => {
 export const useAddSweet = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (sweetData: CreateSweetDto) => sweetsService.addSweet(sweetData),
+    mutationFn: (sweetData: SweetFormData) => sweetsService.addSweet(sweetData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
     },
@@ -24,7 +24,7 @@ export const useAddSweet = () => {
 export const useUpdateSweet = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ sweetId, sweetData }: { sweetId: number; sweetData: UpdateSweetDto }) =>
+    mutationFn: ({ sweetId, sweetData }: { sweetId: number; sweetData: UpdateSweetFormData }) =>
       sweetsService.updateSweet(sweetId, sweetData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sweets'] });
