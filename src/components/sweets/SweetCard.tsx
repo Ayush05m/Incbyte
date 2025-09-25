@@ -139,7 +139,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({
               {sweet.name}
             </CardTitle>
             <span className="text-xl font-bold text-primary">
-              ₹{sweet.price.toFixed(2)}
+              ₹{(sweet.price || 0).toFixed(2)}
             </span>
           </div>
           <Badge variant="outline" className="w-fit">{sweet.category}</Badge>
