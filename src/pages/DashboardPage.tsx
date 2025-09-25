@@ -347,7 +347,7 @@ const DashboardPage: React.FC = () => {
         )}
 
         <AlertDialog open={!!sweetToDelete} onOpenChange={(open) => !open && setSweetToDelete(null)}>
-          <AlertDialogContent className="border-0 shadow-2xl animate-scale-in">
+          <AlertDialogContent className="border-0 shadow-2xl animate-scale-in block">
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2 text-red-800">
                 <AlertTriangle className="h-5 w-5 animate-pulse" />

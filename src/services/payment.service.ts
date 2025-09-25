@@ -1,24 +1,28 @@
 import { api } from './api';
+import { Purchase, RazorpayOrder } from '@/types/purchase.types';
 
-interface RazorpayOrder {
-  id: string;
-  amount: number;
-  currency: string;
-  receipt: string;
+interface PurchaseResponse {
+  purchase: Purchase;
+  order: RazorpayOrder;
+}
+
+interface VerifyPaymentRequest {
+  order_id: string;
+  payment_id: string;
+  signature: string;
 }
 
 export const paymentService = {
-  createOrder: async (amount: number): Promise<RazorpayOrder> => {
-    const response = await api.post('/payments/create-order', { amount });
+  initiatePurchase: async (sweetId: number, quantity: number): Promise<PurchaseResponse> => {
+    const response = await api.post('/payment/purchase', {
+      sweet_id: sweetId,
+      quantity: quantity,
+    });
     return response.data;
   },
 
-  verifyPayment: async (paymentData: {
-    razorpay_order_id: string;
-    razorpay_payment_id: string;
-    razorpay_signature: string;
-  }): Promise<{ success: boolean }> => {
-    const response = await api.post('/payments/verify', paymentData);
+  verifyPayment: async (paymentData: VerifyPaymentRequest): Promise<{ message: string }> => {
+    const response = await api.post('/payment/verify-payment', paymentData);
     return response.data;
-  }
+  },
 };
