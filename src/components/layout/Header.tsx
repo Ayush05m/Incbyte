@@ -30,8 +30,8 @@ const NavLinks: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
   return (
     <div className={isMobile ? "flex flex-col items-start gap-4 w-full" : "flex items-center gap-4"}>
       <NavLinkWrapper>
-        <Link to="/dashboard" className={linkClass}>
-          Dashboard
+        <Link to="/" className={linkClass}>
+          Sweets
         </Link>
       </NavLinkWrapper>
       {isAuthenticated ? (
