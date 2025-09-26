@@ -1,9 +1,12 @@
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/authStore';
-import { Candy } from 'lucide-react';
+import { Candy, Menu } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-export const Header = () => {
+const NavLinks: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -12,6 +15,50 @@ export const Header = () => {
     navigate('/login');
   };
 
+  const linkClass = isMobile
+    ? "text-lg font-medium text-gray-700 hover:text-primary-600 w-full text-left p-2 rounded-md hover:bg-gray-100"
+    : "text-sm font-medium text-gray-600 hover:text-primary-600";
+
+  const Wrapper = isMobile ? 'div' : React.Fragment;
+  const wrapperProps = isMobile ? { className: "flex flex-col items-start gap-4 w-full" } : {};
+
+  return (
+    <Wrapper {...wrapperProps}>
+      <SheetClose asChild={isMobile}>
+        <Link to="/dashboard" className={linkClass}>
+          Dashboard
+        </Link>
+      </SheetClose>
+      {isAuthenticated ? (
+        <>
+          <span className={isMobile ? "text-lg text-gray-700 p-2" : "text-sm text-gray-700"}>
+            Welcome, {user?.username}!
+          </span>
+          <Button variant="outline" size={isMobile ? "lg" : "sm"} onClick={handleLogout} className={isMobile ? "w-full" : ""}>
+            Logout
+          </Button>
+        </>
+      ) : (
+        <>
+          <SheetClose asChild={isMobile}>
+            <Button asChild variant="ghost" size={isMobile ? "lg" : "sm"} className={isMobile ? "w-full justify-start p-2" : ""}>
+              <Link to="/login">Login</Link>
+            </Button>
+          </SheetClose>
+          <SheetClose asChild={isMobile}>
+            <Button asChild size={isMobile ? "lg" : "sm"} className={isMobile ? "w-full" : ""}>
+              <Link to="/register">Register</Link>
+            </Button>
+          </SheetClose>
+        </>
+      )}
+    </Wrapper>
+  );
+};
+
+export const Header: React.FC = () => {
+  const isMobile = useIsMobile();
+
   return (
     <header className="fixed top-0 left-0 right-0 z-40 w-full border-b bg-white/80 backdrop-blur-lg transition-all duration-300">
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -19,28 +66,25 @@ export const Header = () => {
           <Candy className="h-6 w-6" />
           <span>Sweet Shop</span>
         </Link>
-        <div className="flex items-center gap-4">
-          <Link to="/dashboard" className="text-sm font-medium text-gray-600 hover:text-primary-600">
-            Dashboard
-          </Link>
-          {isAuthenticated ? (
-            <>
-              <span className="text-sm text-gray-700">Welcome, {user?.username}!</span>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                Logout
+        {isMobile ? (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Open menu</span>
               </Button>
-            </>
-          ) : (
-            <>
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link to="/register">Register</Link>
-              </Button>
-            </>
-          )}
-        </div>
+            </SheetTrigger>
+            <SheetContent>
+              <div className="mt-8">
+                <NavLinks isMobile={true} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        ) : (
+          <div className="flex items-center gap-4">
+            <NavLinks />
+          </div>
+        )}
       </nav>
     </header>
   );

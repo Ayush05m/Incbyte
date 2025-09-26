@@ -163,7 +163,7 @@ const FormFieldsSection: React.FC<{
     </div>
 
     <div className="flex gap-4">
-      <div>
+      <div className="flex-1">
         <Label htmlFor="price" className="font-semibold">Price (₹)</Label>
         <div className="relative">
           <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -179,7 +179,7 @@ const FormFieldsSection: React.FC<{
         </div>
         {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>}
       </div>
-      <div>
+      <div className="flex-1">
         <Label htmlFor="quantity" className="font-semibold">Quantity</Label>
         <div className="relative">
           <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -224,7 +224,7 @@ export const SweetFormDialog: React.FC<SweetFormDialogProps> = ({ isOpen, onClos
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 max-h-[70vh] overflow-y-auto px-1 pr-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 max-h-[65vh] md:max-h-[70vh] overflow-y-auto px-1 pr-4">
             <ImageUploadSection imageUrl={imageUrl} setValue={setValue} register={register} errors={errors} />
             <FormFieldsSection control={control} register={register} errors={errors} />
           </div>

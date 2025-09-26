@@ -342,31 +342,6 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-/* Responsive grid adjustments */
-@media (max-width: 640px) {
-  .sweets-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 768px) {
-  .sweets-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .sweets-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1025px) {
-  .sweets-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
 /* Enhanced hover effects for grid */
 .sweets-grid:hover>div:not(:hover) {
   opacity: 0.7;

@@ -169,9 +169,9 @@ const DashboardPage: React.FC = () => {
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
-          <div className="text-center md:text-left">
-            <div className="flex items-center gap-4 mb-4">
+        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-center md:items-start mb-8 gap-6">
+          <div className="text-center md:text-left w-full">
+            <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 className="relative p-3 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500 rounded-2xl shadow-lg group"
@@ -182,7 +182,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               </motion.div>
               <div>
-                <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-600 via-rose-600 to-orange-600 bg-clip-text text-transparent animate-gradient-x">
+                <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 via-rose-600 to-orange-600 bg-clip-text text-transparent animate-gradient-x">
                   Sweet Dashboard
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
@@ -191,7 +191,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <p className="text-gray-600 text-lg max-w-md">
+            <p className="text-gray-600 text-lg max-w-md mx-auto md:mx-0">
               {isAdmin ? 'Manage your sweet inventory with style and track sales beautifully' : 'Discover and purchase the most delicious sweets in town'}
             </p>
             {user && (
@@ -203,7 +203,7 @@ const DashboardPage: React.FC = () => {
             )}
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto justify-center">
             {isFiltered && (
               <Button 
                 variant="outline" 
