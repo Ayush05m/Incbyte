@@ -3,6 +3,19 @@ import { Header } from './Header';
 import { CartSheet } from '@/components/cart/CartSheet';
 import { FlyToCartAnimation } from '@/components/animation/FlyToCartAnimation';
 import { FloatingCartButton } from '@/components/cart/FloatingCartButton';
+import { motion } from 'framer-motion';
+
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -20 },
+};
+
+const pageTransition = {
+  type: 'tween',
+  ease: 'anticipate',
+  duration: 0.5,
+};
 
 export const Layout = () => {
   return (
@@ -11,9 +24,16 @@ export const Layout = () => {
       <CartSheet />
       <FlyToCartAnimation />
       <FloatingCartButton />
-      <main className="pt-20">
+      <motion.main
+        className="pt-20"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+      >
         <Outlet />
-      </main>
+      </motion.main>
     </div>
   );
 };

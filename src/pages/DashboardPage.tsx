@@ -25,6 +25,29 @@ import { SweetFormDialog } from '@/components/sweets/SweetFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { RestockDialog } from '@/components/sweets/RestockDialog';
 import { StatsDrawer } from '@/components/dashboard/StatsDrawer';
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 100,
+    },
+  },
+};
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -142,16 +165,24 @@ const DashboardPage: React.FC = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8 animate-fade-in">
-        <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
-          <div className="text-center md:text-left transform animate-slide-in-left">
+      <motion.div 
+        className="relative z-10 container mx-auto px-4 py-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
+          <div className="text-center md:text-left">
             <div className="flex items-center gap-4 mb-4">
-              <div className="relative p-3 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500 rounded-2xl shadow-lg group">
-                <Package className="h-8 w-8 text-white group-hover:scale-110 transition-transform duration-300" />
+              <motion.div 
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className="relative p-3 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500 rounded-2xl shadow-lg group"
+              >
+                <Package className="h-8 w-8 text-white" />
                 <div className="absolute -top-1 -right-1">
                   <Sparkles className="h-4 w-4 text-yellow-400 animate-bounce" />
                 </div>
-              </div>
+              </motion.div>
               <div>
                 <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-600 via-rose-600 to-orange-600 bg-clip-text text-transparent animate-gradient-x">
                   Sweet Dashboard
@@ -166,7 +197,7 @@ const DashboardPage: React.FC = () => {
               {isAdmin ? 'Manage your sweet inventory with style and track sales beautifully' : 'Discover and purchase the most delicious sweets in town'}
             </p>
             {user && (
-              <div className="mt-3 animate-fade-in animation-delay-500">
+              <div className="mt-3">
                 <Badge variant="secondary" className="bg-gradient-to-r from-pink-100 to-orange-100 text-pink-700 border-pink-200 hover:shadow-md transition-shadow">
                   Welcome back, {user.username}! ✨
                 </Badge>
@@ -174,7 +205,7 @@ const DashboardPage: React.FC = () => {
             )}
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-3 animate-slide-in-right">
+          <div className="flex flex-col sm:flex-row gap-3">
             {isFiltered && (
               <Button 
                 variant="outline" 
@@ -205,31 +236,33 @@ const DashboardPage: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
-        <Card className="mb-6 border-0 shadow-xl bg-white/95 backdrop-blur-sm animate-slide-in-up">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg">
-                <Filter className="h-5 w-5 text-white" />
+        <motion.div variants={itemVariants}>
+          <Card className="mb-6 border-0 shadow-xl bg-white/95 backdrop-blur-sm">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg">
+                  <Filter className="h-5 w-5 text-white" />
+                </div>
+                <CardTitle className="text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Search & Filter
+                </CardTitle>
+                {isFiltered && (
+                  <Badge variant="secondary" className="animate-pulse bg-indigo-100 text-indigo-700">
+                    {Object.keys(searchParams).length} filter(s) applied
+                  </Badge>
+                )}
               </div>
-              <CardTitle className="text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Search & Filter
-              </CardTitle>
-              {isFiltered && (
-                <Badge variant="secondary" className="animate-pulse bg-indigo-100 text-indigo-700">
-                  {Object.keys(searchParams).length} filter(s) applied
-                </Badge>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <SweetsToolbar onFilterChange={handleSearch} />
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent>
+              <SweetsToolbar onFilterChange={handleSearch} />
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+          <div className="flex flex-col items-center justify-center py-20">
             <div className="relative">
               <LoadingSpinner />
               <div className="absolute inset-0 animate-ping">
@@ -262,9 +295,9 @@ const DashboardPage: React.FC = () => {
         )}
 
         {!isLoading && !error && sweets && (
-          <>
+          <motion.div variants={itemVariants}>
             {sweets.length === 0 ? (
-              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm animate-fade-in">
+              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
                 <CardContent className="text-center py-16">
                   <div className="relative mb-6">
                     <Package className="h-20 w-20 text-gray-300 mx-auto" />
@@ -292,7 +325,7 @@ const DashboardPage: React.FC = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-6 animate-fade-in">
+              <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
@@ -314,7 +347,7 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
             )}
-          </>
+          </motion.div>
         )}
 
         {isAdmin && (
@@ -384,7 +417,7 @@ const DashboardPage: React.FC = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
+      </motion.div>
     </div>
   );
 };

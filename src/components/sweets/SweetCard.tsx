@@ -31,7 +31,6 @@ export const SweetCard: React.FC<SweetCardProps> = ({
   const { addFlyingItem } = useUiStore();
   const isAdmin = user?.role === 'admin';
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
-  const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -73,27 +72,28 @@ export const SweetCard: React.FC<SweetCardProps> = ({
   const stockStatus = getStockStatus();
 
   return (
-    <div className="group">
+    <motion.div
+      className="group h-full"
+      whileHover={{ y: -8, transition: { type: 'spring', stiffness: 300 } }}
+    >
       <Card 
         className={`
-          overflow-hidden transition-all duration-300 transform-gpu
-          ${isHovered ? 'shadow-xl scale-[1.02]' : 'shadow-lg'}
-          ${isOutOfStock ? 'opacity-80' : ''}
+          overflow-hidden transition-shadow duration-300 shadow-lg hover:shadow-xl
           flex flex-col h-full bg-white/90 backdrop-blur-sm border-0 relative
+          ${isOutOfStock ? 'opacity-80' : ''}
         `}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         <div className="relative overflow-hidden">
-          <img
+          <motion.img
             ref={imageRef}
             src={sweet.imageUrl || '/placeholder.svg'}
             alt={sweet.name}
             className={`
-              w-full h-48 object-cover transition-transform duration-500
-              ${isHovered ? 'scale-105' : 'scale-100'}
+              w-full h-48 object-cover
               ${isOutOfStock ? 'grayscale' : ''}
             `}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
           />
 
@@ -225,6 +225,6 @@ export const SweetCard: React.FC<SweetCardProps> = ({
           )}
         </CardFooter>
       </Card>
-    </div>
+    </motion.div>
   );
 };

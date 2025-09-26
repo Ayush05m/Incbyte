@@ -3,6 +3,7 @@ import { Sweet } from '@/types/sweet.types';
 import { SweetCard } from './SweetCard';
 import { useAuthStore } from '@/store/authStore';
 import { Package, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface SweetGridProps {
   sweets: Sweet[];
@@ -12,6 +13,30 @@ interface SweetGridProps {
   isLoading?: boolean;
   isFiltered: boolean;
 }
+
+const gridContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const gridItemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: 'spring',
+      damping: 15,
+      stiffness: 200,
+    },
+  },
+};
 
 export const SweetGrid: React.FC<SweetGridProps> = ({ 
   sweets, 
@@ -55,22 +80,21 @@ export const SweetGrid: React.FC<SweetGridProps> = ({
 
   return (
     <div className="relative">
-      {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 right-10 w-32 h-32 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float"></div>
         <div className="absolute bottom-10 left-10 w-24 h-24 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float-delayed"></div>
       </div>
 
-      {/* Grid container with stagger animation */}
-      <div className="sweets-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 relative z-10">
-        {sweets.map((sweet, index) => (
-          <div
+      <motion.div 
+        className="sweets-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 relative z-10"
+        variants={gridContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {sweets.map((sweet) => (
+          <motion.div
             key={sweet.id}
-            className="animate-fade-in-up opacity-0"
-            style={{
-              animationDelay: `${index * 100}ms`,
-              animationFillMode: 'forwards'
-            }}
+            variants={gridItemVariants}
           >
             <SweetCard 
               sweet={sweet} 
@@ -79,14 +103,12 @@ export const SweetGrid: React.FC<SweetGridProps> = ({
               onRestock={onRestock}
               isLoading={isLoading} 
             />
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      {/* Grid overlay effects */}
       {sweets.length > 0 && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Floating particles */}
           <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-pink-400 rounded-full animate-float opacity-20"></div>
           <div className="absolute top-1/2 right-1/3 w-1 h-1 bg-purple-400 rounded-full animate-float-delayed opacity-30"></div>
           <div className="absolute bottom-1/3 left-1/2 w-1.5 h-1.5 bg-orange-400 rounded-full animate-float opacity-25"></div>
