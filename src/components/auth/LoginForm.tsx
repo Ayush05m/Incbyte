@@ -57,7 +57,7 @@ export const LoginForm: React.FC = () => {
   const handleDemoLogin = async () => {
     setIsDemoSubmitting(true);
     try {
-      const response = await authService.login({ email: 'demo@example.com', password: 'password' });
+      const response = await authService.login({ email: 'demo@demo.demo', password: 'password' });
       login(response.user, response.token);
       toast.success("Logged in as Demo User!");
       navigate(from, { replace: true });
