@@ -28,7 +28,7 @@ export const CartSheet = () => {
       const { order } = await paymentService.initiatePurchase(item.id, item.quantityInCart);
 
       const options = {
-        key: 'rzp_test_your_key_here', // IMPORTANT: Replace with your actual Razorpay test key
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
         name: 'Sweet Shop',
