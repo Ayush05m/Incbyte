@@ -60,7 +60,7 @@ export const LoginForm: React.FC = () => {
       const response = await authService.login({ email: 'demo@demo.demo', password: 'password' });
       login(response.user, response.token);
       toast.success("Logged in as Demo User!");
-      navigate(from, { replace: true });
+      navigate('/', { replace: true });
     } catch (error: any) {
       const message = error.response?.data?.message || error.response?.data?.error || 'Demo login failed. Please try again.';
       setError('root', { message });
