@@ -7,17 +7,12 @@ import { SearchParams, Sweet, SweetFormData } from '@/types/sweet.types';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { 
   PlusCircle, 
   TrendingUp, 
-  Package, 
   AlertTriangle,
   RefreshCcw,
-  X,
-  Sparkles,
-  Heart
+  X
 } from 'lucide-react';
 import { SweetFormDialog } from '@/components/sweets/SweetFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -156,248 +151,164 @@ const DashboardPage: React.FC = () => {
   const isFiltered = Object.values(searchParams).some(value => value !== undefined && value !== '' && (Array.isArray(value) ? value.length > 0 : true));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-100 relative overflow-hidden -m-4 sm:-m-6 lg:-m-8 p-4 sm:p-6 lg:p-8">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-4000"></div>
-      </div>
-
-      <motion.div 
-        className="relative z-10"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-center md:items-start mb-8 gap-6">
-          <div className="text-center md:text-left w-full">
-            <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-              <motion.div 
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                className="relative p-3 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-500 rounded-2xl shadow-lg group"
-              >
-                <Package className="h-8 w-8 text-white" />
-                <div className="absolute -top-1 -right-1">
-                  <Sparkles className="h-4 w-4 text-yellow-400 animate-bounce" />
-                </div>
-              </motion.div>
-              <div>
-                <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 via-rose-600 to-orange-600 bg-clip-text text-transparent animate-gradient-x">
-                  Sweet Dashboard
-                </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <Heart className="h-4 w-4 text-pink-500 animate-pulse" />
-                  <span className="text-pink-600 text-sm font-medium">Made with love</span>
-                </div>
-              </div>
-            </div>
-            <p className="text-gray-600 text-lg max-w-md mx-auto md:mx-0">
-              {isAdmin ? 'Manage your sweet inventory with style and track sales beautifully' : 'Discover and purchase the most delicious sweets in town'}
+    <motion.div
+      className="space-y-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div variants={itemVariants}>
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              {isAdmin ? 'Sweets Management' : 'Our Sweet Collection'}
+            </h1>
+            <p className="mt-1 text-md text-gray-600">
+              {isAdmin ? 'Add, edit, and manage your sweet inventory.' : 'Browse our delicious, handcrafted sweets.'}
             </p>
-            {user && (
-              <div className="mt-3">
-                <Badge variant="secondary" className="bg-gradient-to-r from-pink-100 to-orange-100 text-pink-700 border-pink-200 hover:shadow-md transition-shadow">
-                  Welcome back, {user.username}! ✨
-                </Badge>
-              </div>
-            )}
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto justify-center">
+          <div className="flex-shrink-0 flex items-center gap-2 w-full md:w-auto">
             {isFiltered && (
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 onClick={clearFilters}
-                className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 border-pink-200 hover:bg-pink-50"
+                className="flex items-center gap-2"
               >
                 <X className="h-4 w-4" />
-                Clear Filters
+                Clear
               </Button>
             )}
             {isAdmin && (
-              <div className="flex flex-col sm:flex-row gap-3">
+              <>
                 <Button 
                   variant="outline"
                   onClick={() => setIsStatsDrawerOpen(true)}
-                  className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 border-purple-200 hover:bg-purple-50"
+                  className="flex items-center gap-2 flex-1"
                 >
                   <TrendingUp className="h-4 w-4" />
-                  View Analytics
+                  Analytics
                 </Button>
                 <Button 
                   onClick={handleOpenAddForm}
-                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+                  className="flex-1"
                 >
-                  <PlusCircle className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-                  Add New Sweet
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Sweet
                 </Button>
-              </div>
+              </>
             )}
           </div>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="mb-6">
-          <SweetsToolbar onFilterChange={handleSearch} />
-        </motion.div>
-
-        {isLoading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="relative">
-              <LoadingSpinner />
-              <div className="absolute inset-0 animate-ping">
-                <div className="w-8 h-8 bg-pink-400 rounded-full opacity-20"></div>
-              </div>
-            </div>
-            <p className="mt-4 text-gray-600 animate-pulse">Loading delicious sweets...</p>
-          </div>
-        )}
-
-        {error && (
-          <Card className="border-0 shadow-xl bg-gradient-to-r from-red-50 to-pink-50 animate-shake">
-            <CardContent className="text-center py-10">
-              <div className="relative mb-4">
-                <AlertTriangle className="h-12 w-12 text-red-500 mx-auto animate-bounce" />
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-12 h-12 bg-red-200 rounded-full animate-ping opacity-20"></div>
-              </div>
-              <h3 className="text-lg font-semibold text-red-800 mb-2">Oops! Something went wrong</h3>
-              <p className="text-red-600 mb-4">We couldn't load the sweets. Please try again.</p>
-              <Button 
-                onClick={() => refetch()} 
-                variant="outline"
-                className="border-red-300 text-red-700 hover:bg-red-50 hover:scale-105 transition-all duration-200"
-              >
-                <RefreshCcw className="h-4 w-4 mr-2" />
-                Try Again
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {!isLoading && !error && sweets && (
-          <motion.div variants={itemVariants}>
-            {sweets.length === 0 ? (
-              <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
-                <CardContent className="text-center py-16">
-                  <div className="relative mb-6">
-                    <Package className="h-20 w-20 text-gray-300 mx-auto" />
-                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-gray-200 rounded-full animate-pulse opacity-30"></div>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                    {isFiltered ? 'No sweets match your criteria' : 'No sweets available'}
-                  </h3>
-                  <p className="text-gray-500 mb-6">
-                    {isFiltered 
-                      ? 'Try adjusting your filters to see more delicious results.' 
-                      : 'The sweet collection is empty. Come back later for sweet surprises!'
-                    }
-                  </p>
-                  {isFiltered && (
-                    <Button 
-                      onClick={clearFilters} 
-                      variant="outline"
-                      className="hover:scale-105 transition-transform duration-200"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Clear Filters
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                      {isFiltered ? 'Filtered Results' : 'All Sweets'}
-                    </h2>
-                    <Badge variant="secondary" className="bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 hover:scale-105 transition-transform duration-200">
-                      {sweets.length} delicious item{sweets.length !== 1 ? 's' : ''}
-                    </Badge>
-                  </div>
-                </div>
-                
-                <SweetGrid
-                  sweets={sweets}
-                  onEdit={handleOpenEditForm}
-                  onDelete={handleOpenDeleteAlert}
-                  onRestock={handleOpenRestockDialog}
-                  isLoading={isMutating}
-                  isFiltered={isFiltered}
-                />
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {isAdmin && (
-          <SweetFormDialog
-            isOpen={isFormOpen}
-            onClose={() => setIsFormOpen(false)}
-            onSubmit={handleFormSubmit}
-            sweet={editingSweet}
-            isSubmitting={addSweetMutation.isPending || updateSweetMutation.isPending}
-          />
-        )}
-
-        {isAdmin && (
-          <RestockDialog
-            isOpen={!!restockingSweet}
-            onClose={() => setRestockingSweet(null)}
-            onSubmit={handleRestockSubmit}
-            sweet={restockingSweet}
-            isSubmitting={restockMutation.isPending}
-          />
-        )}
-
-        {isAdmin && (
-          <StatsDrawer
-            stats={stats}
-            isMutating={isMutating}
-            isOpen={isStatsDrawerOpen}
-            onOpenChange={setIsStatsDrawerOpen}
-          />
-        )}
-
-        <AlertDialog open={!!sweetToDelete} onOpenChange={(open) => !open && setSweetToDelete(null)}>
-          <AlertDialogContent className="border-0 shadow-2xl animate-scale-in block">
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2 text-red-800">
-                <AlertTriangle className="h-5 w-5 animate-pulse" />
-                Delete "{sweetToDelete?.name}"?
-              </AlertDialogTitle>
-              <AlertDialogDescription className="text-gray-600">
-                This action cannot be undone. This will permanently remove <strong>{sweetToDelete?.name}</strong> from your inventory.
-                {sweetToDelete && sweetToDelete.quantity > 0 && (
-                  <div className="mt-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg animate-fade-in">
-                    <p className="text-sm text-yellow-800 font-medium flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4" />
-                      This sweet still has {sweetToDelete.quantity} units in stock
-                    </p>
-                  </div>
-                )}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel className="hover:scale-105 transition-transform duration-200">
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDeleteConfirm}
-                className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 hover:scale-105 transition-all duration-200"
-                disabled={deleteSweetMutation.isPending}
-              >
-                {deleteSweetMutation.isPending ? (
-                  <div className="flex items-center gap-2">
-                    <RefreshCcw className="h-4 w-4 animate-spin" />
-                    Deleting...
-                  </div>
-                ) : 'Delete Sweet'}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        </div>
       </motion.div>
-    </div>
+
+      <motion.div variants={itemVariants}>
+        <SweetsToolbar onFilterChange={handleSearch} />
+      </motion.div>
+
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center py-20">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">Loading delicious sweets...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="text-center py-10 bg-red-50 rounded-lg">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto" />
+          <h3 className="mt-2 text-lg font-semibold text-red-800">Oops! Something went wrong</h3>
+          <p className="mt-1 text-red-600">We couldn't load the sweets. Please try again.</p>
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline"
+            className="mt-4 border-red-300 text-red-700 hover:bg-red-100"
+          >
+            <RefreshCcw className="h-4 w-4 mr-2" />
+            Try Again
+          </Button>
+        </div>
+      )}
+
+      {!isLoading && !error && sweets && (
+        <motion.div variants={itemVariants}>
+          <SweetGrid
+            sweets={sweets}
+            onEdit={handleOpenEditForm}
+            onDelete={handleOpenDeleteAlert}
+            onRestock={handleOpenRestockDialog}
+            isLoading={isMutating}
+            isFiltered={isFiltered}
+          />
+        </motion.div>
+      )}
+
+      {isAdmin && (
+        <SweetFormDialog
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          onSubmit={handleFormSubmit}
+          sweet={editingSweet}
+          isSubmitting={addSweetMutation.isPending || updateSweetMutation.isPending}
+        />
+      )}
+
+      {isAdmin && (
+        <RestockDialog
+          isOpen={!!restockingSweet}
+          onClose={() => setRestockingSweet(null)}
+          onSubmit={handleRestockSubmit}
+          sweet={restockingSweet}
+          isSubmitting={restockMutation.isPending}
+        />
+      )}
+
+      {isAdmin && (
+        <StatsDrawer
+          stats={stats}
+          isMutating={isMutating}
+          isOpen={isStatsDrawerOpen}
+          onOpenChange={setIsStatsDrawerOpen}
+        />
+      )}
+
+      <AlertDialog open={!!sweetToDelete} onOpenChange={(open) => !open && setSweetToDelete(null)}>
+        <AlertDialogContent className="border-0 shadow-2xl animate-scale-in block">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-800">
+              <AlertTriangle className="h-5 w-5 animate-pulse" />
+              Delete "{sweetToDelete?.name}"?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600">
+              This action cannot be undone. This will permanently remove <strong>{sweetToDelete?.name}</strong> from your inventory.
+              {sweetToDelete && sweetToDelete.quantity > 0 && (
+                <div className="mt-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg animate-fade-in">
+                  <p className="text-sm text-yellow-800 font-medium flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    This sweet still has {sweetToDelete.quantity} units in stock
+                  </p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="hover:scale-105 transition-transform duration-200">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 hover:scale-105 transition-all duration-200"
+              disabled={deleteSweetMutation.isPending}
+            >
+              {deleteSweetMutation.isPending ? (
+                <div className="flex items-center gap-2">
+                  <RefreshCcw className="h-4 w-4 animate-spin" />
+                  Deleting...
+                </div>
+              ) : 'Delete Sweet'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </motion.div>
   );
 };
 
