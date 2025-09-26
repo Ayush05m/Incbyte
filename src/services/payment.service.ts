@@ -14,7 +14,7 @@ interface VerifyPaymentRequest {
 
 export const paymentService = {
   initiatePurchase: async (sweetId: number, quantity: number): Promise<PurchaseResponse> => {
-    const response = await api.post('/payment/purchase', {
+    const response = await api.post('/purchases/initiate', {
       sweet_id: sweetId,
       quantity: quantity,
     });
@@ -22,7 +22,7 @@ export const paymentService = {
   },
 
   verifyPayment: async (paymentData: VerifyPaymentRequest): Promise<{ message: string }> => {
-    const response = await api.post('/payment/verify-payment', paymentData);
+    const response = await api.post('/purchases/verify', paymentData);
     return response.data;
   },
 };
