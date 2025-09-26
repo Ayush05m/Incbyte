@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Search, X, DollarSign, Tag } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
+import { Search, X, DollarSign, Tag, Filter } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { motion } from 'framer-motion';
 
 interface SweetsToolbarProps {
@@ -22,11 +24,18 @@ const PRESET_RANGES = [
 ];
 
 export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) => {
+  // Main filter state
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, MAX_PRICE]);
   
+  // Temp state for mobile sheet
+  const [tempCategory, setTempCategory] = useState(category);
+  const [tempPriceRange, setTempPriceRange] = useState(priceRange);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   const debouncedQuery = useDebounce(query, 300);
+  const isMobile = useIsMobile();
 
   const isPriceDefault = priceRange[0] === 0 && priceRange[1] === MAX_PRICE;
   const activeFiltersCount = [debouncedQuery, category, !isPriceDefault].filter(Boolean).length;
@@ -35,25 +44,43 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
     const params: SearchParams = {};
     if (debouncedQuery) params.query = debouncedQuery;
     if (category) params.category = category;
-    if (!isPriceDefault) {
-      params.priceRange = priceRange;
-    }
+    if (!isPriceDefault) params.priceRange = priceRange;
     onFilterChange(params);
   }, [debouncedQuery, category, priceRange, onFilterChange, isPriceDefault]);
+
+  // Sync temp state when sheet opens
+  useEffect(() => {
+    if (isSheetOpen) {
+      setTempCategory(category);
+      setTempPriceRange(priceRange);
+    }
+  }, [isSheetOpen, category, priceRange]);
 
   const handleReset = () => {
     setQuery('');
     setCategory('');
     setPriceRange([0, MAX_PRICE]);
+    setTempCategory('');
+    setTempPriceRange([0, MAX_PRICE]);
+  };
+
+  const handleApplyMobileFilters = () => {
+    setCategory(tempCategory);
+    setPriceRange(tempPriceRange);
+    setIsSheetOpen(false);
   };
 
   const handleCategorySelect = (cat: string) => {
     setCategory(prev => prev === cat ? '' : cat);
   };
 
+  const handleMobileCategorySelect = (cat: string) => {
+    setTempCategory(prev => prev === cat ? '' : cat);
+  };
+
   const priceDisplay = isPriceDefault ? 'Price' : `₹${priceRange[0]} - ₹${priceRange[1]}`;
 
-  return (
+  const renderDesktopToolbar = () => (
     <motion.div 
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -86,14 +113,7 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
         <PopoverContent className="w-64 p-2">
           <div className="grid grid-cols-2 gap-2">
             {CATEGORIES.map(cat => (
-              <Button
-                key={cat}
-                variant={category === cat ? "default" : "ghost"}
-                onClick={() => handleCategorySelect(cat)}
-                className="w-full justify-start"
-              >
-                {cat}
-              </Button>
+              <Button key={cat} variant={category === cat ? "default" : "ghost"} onClick={() => handleCategorySelect(cat)} className="w-full justify-start">{cat}</Button>
             ))}
           </div>
         </PopoverContent>
@@ -108,31 +128,12 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
         </PopoverTrigger>
         <PopoverContent className="w-80 p-4">
           <div className="space-y-4">
-            <div className="text-center font-medium text-gray-700">
-              Price Range: <span className="font-bold text-primary">₹{priceRange[0]} - ₹{priceRange[1]}</span>
-            </div>
-            <Slider
-              min={0}
-              max={MAX_PRICE}
-              step={1}
-              value={priceRange}
-              onValueChange={(value) => setPriceRange(value as [number, number])}
-            />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>₹0</span>
-              <span>₹{MAX_PRICE}</span>
-            </div>
+            <div className="text-center font-medium text-gray-700">Price Range: <span className="font-bold text-primary">₹{priceRange[0]} - ₹{priceRange[1]}</span></div>
+            <Slider min={0} max={MAX_PRICE} step={1} value={priceRange} onValueChange={(value) => setPriceRange(value as [number, number])} />
+            <div className="flex justify-between text-xs text-gray-500"><span>₹0</span><span>₹{MAX_PRICE}</span></div>
             <div className="flex gap-2">
               {PRESET_RANGES.map(preset => (
-                <Button
-                  key={preset.label}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPriceRange(preset.range)}
-                  className="flex-1"
-                >
-                  {preset.label}
-                </Button>
+                <Button key={preset.label} variant="outline" size="sm" onClick={() => setPriceRange(preset.range)} className="flex-1">{preset.label}</Button>
               ))}
             </div>
           </div>
@@ -141,21 +142,76 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
 
       {activeFiltersCount > 0 && (
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-          <Button 
-            variant="ghost" 
-            onClick={handleReset} 
-            className="h-12 w-12 p-0 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
-            aria-label="Clear filters"
-          >
-            <div className="relative">
-              <X className="h-5 w-5" />
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">
-                {activeFiltersCount}
-              </Badge>
-            </div>
+          <Button variant="ghost" onClick={handleReset} className="h-12 w-12 p-0 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all duration-200" aria-label="Clear filters">
+            <div className="relative"><X className="h-5 w-5" /><Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">{activeFiltersCount}</Badge></div>
           </Button>
         </motion.div>
       )}
     </motion.div>
   );
+
+  const renderMobileToolbar = () => (
+    <motion.div 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 100 }}
+      className="flex items-center gap-3 p-3 bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-gray-200/80"
+    >
+      <div className="relative flex-1">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+        <Input
+          type="text"
+          placeholder="Search sweets..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="pl-11 h-12 text-base border-2 border-transparent focus:border-pink-300 focus:bg-white transition-all duration-300 rounded-xl bg-gray-50/80"
+        />
+      </div>
+
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetTrigger asChild>
+          <Button variant="outline" className="h-12 w-12 p-0 rounded-xl relative">
+            <Filter className="h-5 w-5" />
+            {activeFiltersCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">{activeFiltersCount}</Badge>
+            )}
+          </Button>
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Filter Sweets</SheetTitle>
+          </SheetHeader>
+          <div className="py-6 space-y-6">
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-700">Category</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {CATEGORIES.map(cat => (
+                  <Button key={cat} variant={tempCategory === cat ? "default" : "outline"} onClick={() => handleMobileCategorySelect(cat)}>{cat}</Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <h3 className="font-semibold text-gray-700">Price Range</h3>
+              <div className="text-center font-medium text-gray-700">
+                <span className="font-bold text-primary">₹{tempPriceRange[0]} - ₹{tempPriceRange[1]}</span>
+              </div>
+              <Slider min={0} max={MAX_PRICE} step={1} value={tempPriceRange} onValueChange={(value) => setTempPriceRange(value as [number, number])} />
+              <div className="flex justify-between text-xs text-gray-500"><span>₹0</span><span>₹{MAX_PRICE}</span></div>
+              <div className="flex gap-2">
+                {PRESET_RANGES.map(preset => (
+                  <Button key={preset.label} variant="outline" size="sm" onClick={() => setTempPriceRange(preset.range)} className="flex-1">{preset.label}</Button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <SheetFooter className="grid grid-cols-2 gap-3">
+            <Button variant="ghost" onClick={handleReset}>Clear All</Button>
+            <Button onClick={handleApplyMobileFilters}>Apply Filters</Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    </motion.div>
+  );
+
+  return isMobile ? renderMobileToolbar() : renderDesktopToolbar();
 };
