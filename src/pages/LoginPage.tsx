@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const LoginPage = () => {
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-5rem)] px-4 py-8 sm:py-12">
+    <div className="flex items-center justify-center py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle>Welcome Back!</CardTitle>

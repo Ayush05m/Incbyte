@@ -25,7 +25,7 @@ export const Layout = () => {
       <FlyToCartAnimation />
       <FloatingCartButton />
       <motion.main
-        className="pt-20"
+        className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12"
         initial="initial"
         animate="in"
         exit="out"

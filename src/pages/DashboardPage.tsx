@@ -156,7 +156,7 @@ const DashboardPage: React.FC = () => {
   const isFiltered = Object.values(searchParams).some(value => value !== undefined && value !== '' && (Array.isArray(value) ? value.length > 0 : true));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-100 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-100 relative overflow-hidden -m-4 sm:-m-6 lg:-m-8 p-4 sm:p-6 lg:p-8">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-2000"></div>
@@ -164,7 +164,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       <motion.div 
-        className="relative z-10 container mx-auto px-4 py-8"
+        className="relative z-10"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
