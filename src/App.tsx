@@ -19,7 +19,14 @@ const AppRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route element={<Layout />}>
-          <Route path="/" element={<DashboardPage />} />
+          <Route
+            path="/"
+            element={
+              <AuthGuard isPrivate={true}>
+                <DashboardPage />
+              </AuthGuard>
+            }
+          />
           <Route
             path="/login"
             element={

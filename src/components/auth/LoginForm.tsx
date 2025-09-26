@@ -25,7 +25,7 @@ export const LoginForm: React.FC = () => {
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = location.state?.from?.pathname || '/';
   
   const {
     register,
