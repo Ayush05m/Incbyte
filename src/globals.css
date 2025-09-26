@@ -574,40 +574,40 @@ input:focus-visible {
 
 /* Responsive grid adjustments */
 @media (max-width: 640px) {
-  .grid {
+  .sweets-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
-  .grid {
+  .sweets-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  .grid {
+  .sweets-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (min-width: 1025px) {
-  .grid {
+  .sweets-grid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
 
 /* Enhanced hover effects for grid */
-.grid:hover>div:not(:hover) {
+.sweets-grid:hover>div:not(:hover) {
   opacity: 0.7;
   transform: scale(0.98);
 }
 
-.grid>div {
+.sweets-grid>div {
   transition: all 0.3s ease-in-out;
 }
 
-.grid>div:hover {
+.sweets-grid>div:hover {
   opacity: 1;
   transform: scale(1.02);
   z-index: 10;

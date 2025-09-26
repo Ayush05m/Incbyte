@@ -62,7 +62,7 @@ export const SweetGrid: React.FC<SweetGridProps> = ({
       </div>
 
       {/* Grid container with stagger animation */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 relative z-10">
+      <div className="sweets-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 relative z-10">
         {sweets.map((sweet, index) => (
           <div
             key={sweet.id}
