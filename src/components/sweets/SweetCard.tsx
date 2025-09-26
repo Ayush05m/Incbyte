@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ShoppingCart, Package, MoreVertical, Edit, Trash2, Star, Heart, PackagePlus, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sweet } from '@/types/sweet.types';
@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { useCartStore } from '@/store/cartStore';
+import { useUiStore } from '@/store/uiStore';
 
 interface SweetCardProps {
   sweet: Sweet;
@@ -27,11 +28,13 @@ export const SweetCard: React.FC<SweetCardProps> = ({
 }) => {
   const { user } = useAuthStore();
   const { addItem } = useCartStore();
+  const { addFlyingItem } = useUiStore();
   const isAdmin = user?.role === 'admin';
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
   
   const displayQuantity = Math.max(0, sweet.quantity);
   const isOutOfStock = displayQuantity <= 0;
@@ -49,6 +52,11 @@ export const SweetCard: React.FC<SweetCardProps> = ({
   };
 
   const handleAddToCart = () => {
+    if (imageRef.current) {
+      const rect = imageRef.current.getBoundingClientRect();
+      addFlyingItem(sweet.imageUrl || '/placeholder.svg', rect);
+    }
+
     addItem(sweet, purchaseQuantity);
     setIsAdded(true);
     setTimeout(() => {
@@ -78,6 +86,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({
       >
         <div className="relative overflow-hidden">
           <img
+            ref={imageRef}
             src={sweet.imageUrl || '/placeholder.svg'}
             alt={sweet.name}
             className={`
