@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Package, MoreVertical, Edit, Trash2, Star, Heart, PackagePlus } from 'lucide-react';
+import { ShoppingCart, Package, MoreVertical, Edit, Trash2, Star, Heart, PackagePlus, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Sweet } from '@/types/sweet.types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +31,7 @@ export const SweetCard: React.FC<SweetCardProps> = ({
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
   
   const displayQuantity = Math.max(0, sweet.quantity);
   const isOutOfStock = displayQuantity <= 0;
@@ -48,6 +50,10 @@ export const SweetCard: React.FC<SweetCardProps> = ({
 
   const handleAddToCart = () => {
     addItem(sweet, purchaseQuantity);
+    setIsAdded(true);
+    setTimeout(() => {
+      setIsAdded(false);
+    }, 2000);
   };
 
   const getStockStatus = () => {
@@ -172,15 +178,39 @@ export const SweetCard: React.FC<SweetCardProps> = ({
                 value={purchaseQuantity}
                 onChange={handleQuantityChange}
                 className="w-16 h-9 text-center"
-                disabled={isOutOfStock || isLoading}
+                disabled={isOutOfStock || isLoading || isAdded}
               />
               <Button 
                 onClick={handleAddToCart} 
-                disabled={isOutOfStock || isLoading || purchaseQuantity > sweet.quantity} 
-                className="w-full bg-primary hover:bg-primary/90"
+                disabled={isOutOfStock || isLoading || purchaseQuantity > sweet.quantity || isAdded} 
+                className={`w-full transition-colors duration-300 ${
+                  isAdded 
+                    ? 'bg-green-500 hover:bg-green-600' 
+                    : 'bg-primary hover:bg-primary/90'
+                }`}
               >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={isAdded ? 'added' : 'add'}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center justify-center"
+                  >
+                    {isAdded ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        <span>Added!</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        <span>Add to Cart</span>
+                      </>
+                    )}
+                  </motion.span>
+                </AnimatePresence>
               </Button>
             </div>
           )}
