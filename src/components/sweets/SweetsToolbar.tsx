@@ -4,10 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Search, Filter, X, DollarSign, Tag, RefreshCcw, TrendingUp, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Search, X, DollarSign, Tag } from 'lucide-react';
 import { useDebounce } from '@/hooks/useDebounce';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface SweetsToolbarProps {
   onFilterChange: (params: SearchParams) => void;
@@ -16,35 +16,30 @@ interface SweetsToolbarProps {
 const CATEGORIES = ["Cakes", "Pastries", "Candies", "Frozen"];
 const MAX_PRICE = 50;
 const PRESET_RANGES = [
-  { label: "Budget", range: [0, 10] as [number, number], icon: "💰", color: "from-green-400 to-emerald-400" },
-  { label: "Mid-range", range: [10, 25] as [number, number], icon: "⭐", color: "from-blue-400 to-indigo-400" },
-  { label: "Premium", range: [25, 50] as [number, number], icon: "💎", color: "from-purple-400 to-pink-400" }
+  { label: "Budget", range: [0, 10] as [number, number] },
+  { label: "Mid-range", range: [10, 25] as [number, number] },
+  { label: "Premium", range: [25, 50] as [number, number] }
 ];
 
 export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, MAX_PRICE]);
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   const debouncedQuery = useDebounce(query, 300);
 
-  const activeFiltersCount = [
-    debouncedQuery,
-    category,
-    priceRange[0] > 0 || priceRange[1] < MAX_PRICE
-  ].filter(Boolean).length;
+  const isPriceDefault = priceRange[0] === 0 && priceRange[1] === MAX_PRICE;
+  const activeFiltersCount = [debouncedQuery, category, !isPriceDefault].filter(Boolean).length;
 
   useEffect(() => {
     const params: SearchParams = {};
     if (debouncedQuery) params.query = debouncedQuery;
     if (category) params.category = category;
-    if (priceRange[0] > 0 || priceRange[1] < MAX_PRICE) {
+    if (!isPriceDefault) {
       params.priceRange = priceRange;
     }
     onFilterChange(params);
-  }, [debouncedQuery, category, priceRange, onFilterChange]);
+  }, [debouncedQuery, category, priceRange, onFilterChange, isPriceDefault]);
 
   const handleReset = () => {
     setQuery('');
@@ -52,330 +47,115 @@ export const SweetsToolbar: React.FC<SweetsToolbarProps> = ({ onFilterChange }) 
     setPriceRange([0, MAX_PRICE]);
   };
 
-  const handlePresetRange = (range: [number, number]) => {
-    setPriceRange(range);
+  const handleCategorySelect = (cat: string) => {
+    setCategory(prev => prev === cat ? '' : cat);
   };
 
-  const hasFilters = activeFiltersCount > 0;
+  const priceDisplay = isPriceDefault ? 'Price' : `₹${priceRange[0]} - ₹${priceRange[1]}`;
 
   return (
-    <div className="space-y-6">
-      <div className="relative group">
-        <div className={`
-          absolute inset-0 bg-gradient-to-r from-pink-400 via-purple-400 to-orange-400 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-500
-          ${isSearchFocused ? 'opacity-30' : ''}
-        `}></div>
-        
-        <div className="relative">
-          <Search className={`
-            absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-all duration-300
-            ${isSearchFocused ? 'text-pink-500 scale-110' : 'text-gray-400'}
-          `} />
-          <Input
-            type="text"
-            placeholder="Search for your favorite sweets..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setIsSearchFocused(false)}
-            className={`
-              pl-12 pr-12 h-14 text-base border-2 transition-all duration-300 bg-white/90 backdrop-blur-sm
-              ${isSearchFocused 
-                ? 'border-pink-300 shadow-lg scale-105 bg-white' 
-                : 'border-gray-200 hover:border-pink-200 shadow-md'
-              }
-              rounded-xl
-            `}
-          />
-          {query && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setQuery('')}
-              className={`
-                absolute right-3 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 
-                hover:bg-red-100 hover:text-red-600 rounded-full transition-all duration-200
-                ${query ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}
-              `}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          
-          {query && (
-            <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg border animate-slide-down">
-              <p className="text-sm text-gray-600 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-yellow-500" />
-                Searching for "{query}"...
-              </p>
-            </div>
-          )}
-        </div>
+    <motion.div 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 100 }}
+      className="flex flex-col md:flex-row items-center gap-3 p-3 bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-gray-200/80"
+    >
+      <div className="relative w-full md:flex-1">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+        <Input
+          type="text"
+          placeholder="Search sweets..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="pl-11 h-12 text-base border-2 border-transparent focus:border-pink-300 focus:bg-white transition-all duration-300 rounded-xl bg-gray-50/80"
+        />
       </div>
 
-      <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-          className={`
-            gap-3 h-12 px-6 transition-all duration-300
-            ${isAdvancedOpen 
-              ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg scale-105' 
-              : 'hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:scale-105'
-            }
-            border-2 rounded-xl
-          `}
-        >
-          <Filter className={`h-5 w-5 transition-transform duration-300 ${isAdvancedOpen ? 'rotate-180' : ''}`} />
-          <span className="font-medium">Advanced Filters</span>
-          {isAdvancedOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          {activeFiltersCount > 0 && (
-            <Badge 
-              variant="secondary" 
-              className={`
-                ml-1 transition-all duration-300
-                ${isAdvancedOpen 
-                  ? 'bg-white/20 text-white' 
-                  : 'bg-gradient-to-r from-pink-500 to-orange-500 text-white animate-pulse'
-                }
-              `}
-            >
-              {activeFiltersCount}
-            </Badge>
-          )}
-        </Button>
-        
-        {hasFilters && (
-          <Button 
-            onClick={handleReset} 
-            variant="ghost" 
-            size="sm" 
-            className="gap-2 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 hover:scale-105 rounded-lg"
-          >
-            <RefreshCcw className="h-4 w-4" />
-            Clear All
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant={category ? "default" : "outline"} className="w-full md:w-auto h-12 rounded-xl flex items-center justify-center gap-2 transition-all duration-300">
+            <Tag className="h-4 w-4" />
+            <span className="font-medium">{category || 'Category'}</span>
+            {category && (
+              <motion.div whileHover={{ scale: 1.2, rotate: 90 }} onClick={(e) => { e.stopPropagation(); setCategory(''); }}>
+                <X className="h-4 w-4 opacity-70 hover:opacity-100" />
+              </motion.div>
+            )}
           </Button>
-        )}
-      </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-64 p-2">
+          <div className="grid grid-cols-2 gap-2">
+            {CATEGORIES.map(cat => (
+              <Button
+                key={cat}
+                variant={category === cat ? "default" : "ghost"}
+                onClick={() => handleCategorySelect(cat)}
+                className="w-full justify-start"
+              >
+                {cat}
+              </Button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
 
-      <AnimatePresence>
-        {isAdvancedOpen && (
-          <motion.div
-            key="advanced-filters"
-            initial={{ opacity: 0, height: 0, y: -20 }}
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="overflow-hidden"
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant={!isPriceDefault ? "default" : "outline"} className="w-full md:w-auto h-12 rounded-xl flex items-center justify-center gap-2 transition-all duration-300">
+            <DollarSign className="h-4 w-4" />
+            <span className="font-medium">{priceDisplay}</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 p-4">
+          <div className="space-y-4">
+            <div className="text-center font-medium text-gray-700">
+              Price Range: <span className="font-bold text-primary">₹{priceRange[0]} - ₹{priceRange[1]}</span>
+            </div>
+            <Slider
+              min={0}
+              max={MAX_PRICE}
+              step={1}
+              value={priceRange}
+              onValueChange={(value) => setPriceRange(value as [number, number])}
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>₹0</span>
+              <span>₹{MAX_PRICE}</span>
+            </div>
+            <div className="flex gap-2">
+              {PRESET_RANGES.map(preset => (
+                <Button
+                  key={preset.label}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPriceRange(preset.range)}
+                  className="flex-1"
+                >
+                  {preset.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {activeFiltersCount > 0 && (
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+          <Button 
+            variant="ghost" 
+            onClick={handleReset} 
+            className="h-12 w-12 p-0 rounded-xl text-gray-500 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
+            aria-label="Clear filters"
           >
-            <Card className="border-2 border-gradient-to-r from-orange-200 to-pink-200 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50 shadow-xl">
-              <CardContent className="p-8 space-y-8">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg shadow-md">
-                      <Tag className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        Category Selection
-                        {category && (
-                          <Badge 
-                            variant="outline" 
-                            className="bg-orange-100 text-orange-800 border-orange-300 animate-bounce"
-                          >
-                            {category}
-                          </Badge>
-                        )}
-                      </label>
-                      <p className="text-sm text-gray-600 mt-1">Choose your favorite sweet category</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    <Button
-                      variant={!category ? "default" : "outline"}
-                      size="lg"
-                      onClick={() => setCategory('')}
-                      className={`
-                        h-12 transition-all duration-300 rounded-xl
-                        ${!category 
-                          ? "bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 shadow-lg scale-105" 
-                          : "hover:bg-orange-50 hover:border-orange-300 hover:scale-105"
-                        }
-                      `}
-                    >
-                      <span className="font-medium">All Categories</span>
-                    </Button>
-                    {CATEGORIES.map(cat => (
-                      <Button
-                        key={cat}
-                        variant={category === cat ? "default" : "outline"}
-                        size="lg"
-                        onClick={() => setCategory(cat)}
-                        className={`
-                          h-12 transition-all duration-300 rounded-xl
-                          ${category === cat 
-                            ? "bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 shadow-lg scale-105" 
-                            : "hover:bg-orange-50 hover:border-orange-300 hover:scale-105"
-                          }
-                        `}
-                      >
-                        <span className="font-medium">{cat}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg shadow-md">
-                      <DollarSign className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        Price Range: ${priceRange[0]} - ${priceRange[1]}
-                        {(priceRange[0] > 0 || priceRange[1] < MAX_PRICE) && (
-                          <Badge 
-                            variant="outline" 
-                            className="bg-green-100 text-green-800 border-green-300 animate-bounce"
-                          >
-                            Custom Range
-                          </Badge>
-                        )}
-                      </label>
-                      <p className="text-sm text-gray-600 mt-1">Find sweets within your budget</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {PRESET_RANGES.map(preset => (
-                      <Button
-                        key={preset.label}
-                        variant="outline"
-                        size="lg"
-                        onClick={() => handlePresetRange(preset.range)}
-                        className={`
-                          h-16 p-4 transition-all duration-300 rounded-xl border-2
-                          ${
-                            priceRange[0] === preset.range[0] && priceRange[1] === preset.range[1]
-                              ? `bg-gradient-to-r ${preset.color} text-white shadow-lg scale-105 border-transparent`
-                              : "hover:bg-green-50 hover:border-green-300 hover:scale-105"
-                          }
-                        `}
-                      >
-                        <div className="flex flex-col items-center gap-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{preset.icon}</span>
-                            <TrendingUp className="h-4 w-4" />
-                          </div>
-                          <span className="font-bold">{preset.label}</span>
-                          <span className="text-sm opacity-80">${preset.range[0]}-${preset.range[1]}</span>
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-
-                  <div className="px-4 py-6 bg-white/60 rounded-xl border border-green-200">
-                    <div className="mb-4">
-                      <span className="text-sm font-medium text-gray-700 mb-2 block">Custom Price Range</span>
-                    </div>
-                    <Slider
-                      min={0}
-                      max={MAX_PRICE}
-                      step={1}
-                      value={priceRange}
-                      onValueChange={(value) => setPriceRange(value as [number, number])}
-                      className="w-full mb-4"
-                    />
-                    <div className="flex justify-between items-center text-sm">
-                      <div className="flex flex-col items-center">
-                        <span className="text-gray-500">Min</span>
-                        <span className="font-bold text-green-600">${priceRange[0]}</span>
-                      </div>
-                      <div className="flex-1 mx-4">
-                        <div className="h-1 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full relative">
-                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                            <Sparkles className="h-3 w-3 text-yellow-500 animate-pulse" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <span className="text-gray-500">Max</span>
-                        <span className="font-bold text-green-600">${priceRange[1]}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {hasFilters && (
-                  <div className="pt-6 border-t border-orange-200 animate-fade-in">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg">
-                          <Filter className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="text-lg font-bold text-gray-800">Active Filters</span>
-                        <Badge 
-                          variant="secondary" 
-                          className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white animate-pulse"
-                        >
-                          {activeFiltersCount} applied
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-3">
-                      {query && (
-                        <Badge 
-                          variant="outline" 
-                          className="bg-blue-50 text-blue-700 border-blue-300 px-3 py-2 text-sm hover:bg-blue-100 transition-colors duration-200 rounded-lg"
-                        >
-                          <Search className="h-3 w-3 mr-1" />
-                          Search: "{query.substring(0, 20)}{query.length > 20 ? '...' : ''}"
-                        </Badge>
-                      )}
-                      {category && (
-                        <Badge 
-                          variant="outline" 
-                          className="bg-orange-50 text-orange-700 border-orange-300 px-3 py-2 text-sm hover:bg-orange-100 transition-colors duration-200 rounded-lg"
-                        >
-                          <Tag className="h-3 w-3 mr-1" />
-                          Category: {category}
-                        </Badge>
-                      )}
-                      {(priceRange[0] > 0 || priceRange[1] < MAX_PRICE) && (
-                        <Badge 
-                          variant="outline" 
-                          className="bg-green-50 text-green-700 border-green-300 px-3 py-2 text-sm hover:bg-green-100 transition-colors duration-200 rounded-lg"
-                        >
-                          <DollarSign className="h-3 w-3 mr-1" />
-                          Price: ${priceRange[0]}-${priceRange[1]}
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
-                      <p className="text-sm text-gray-600">
-                        Filters help you find the perfect sweet faster! ✨
-                      </p>
-                      <Button
-                        onClick={handleReset}
-                        variant="outline"
-                        size="sm"
-                        className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-200 hover:scale-105 rounded-lg"
-                      >
-                        <RefreshCcw className="h-3 w-3 mr-2" />
-                        Reset All
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+            <div className="relative">
+              <X className="h-5 w-5" />
+              <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary text-primary-foreground">
+                {activeFiltersCount}
+              </Badge>
+            </div>
+          </Button>
+        </motion.div>
+      )}
+    </motion.div>
   );
 };
