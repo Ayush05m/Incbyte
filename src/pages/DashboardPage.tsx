@@ -185,22 +185,24 @@ const DashboardPage: React.FC = () => {
                 Clear Filters
               </Button>
             )}
-            <Button 
-              variant="outline"
-              onClick={() => setIsStatsDrawerOpen(true)}
-              className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 border-purple-200 hover:bg-purple-50"
-            >
-              <TrendingUp className="h-4 w-4" />
-              View Analytics
-            </Button>
             {isAdmin && (
-              <Button 
-                onClick={handleOpenAddForm}
-                className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
-              >
-                <PlusCircle className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
-                Add New Sweet
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsStatsDrawerOpen(true)}
+                  className="flex items-center gap-2 hover:scale-105 transition-transform duration-200 border-purple-200 hover:bg-purple-50"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  View Analytics
+                </Button>
+                <Button 
+                  onClick={handleOpenAddForm}
+                  className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+                >
+                  <PlusCircle className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                  Add New Sweet
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -335,12 +337,14 @@ const DashboardPage: React.FC = () => {
           />
         )}
 
-        <StatsDrawer
-          stats={stats}
-          isMutating={isMutating}
-          isOpen={isStatsDrawerOpen}
-          onOpenChange={setIsStatsDrawerOpen}
-        />
+        {isAdmin && (
+          <StatsDrawer
+            stats={stats}
+            isMutating={isMutating}
+            isOpen={isStatsDrawerOpen}
+            onOpenChange={setIsStatsDrawerOpen}
+          />
+        )}
 
         <AlertDialog open={!!sweetToDelete} onOpenChange={(open) => !open && setSweetToDelete(null)}>
           <AlertDialogContent className="border-0 shadow-2xl animate-scale-in block">
