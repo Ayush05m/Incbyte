@@ -23,6 +23,17 @@ This project is built with a modern, robust, and scalable tech stack:
 -   **Routing:** [React Router](https://reactrouter.com/) for seamless client-side navigation.
 -   **Form Handling:** [React Hook Form](https://react-hook-form.com/) and [Zod](https://zod.dev/) for powerful and type-safe form validation.
 
+## AI-Assisted Development
+
+This project was developed in collaboration with **Dyad**, an AI-powered coding assistant. The entire application, from initial setup to final features, was built through a conversational development process. The AI was responsible for:
+
+-   **Generating Code:** Writing React components, services, and state management logic based on natural language prompts.
+-   **Implementing Features:** Building out core functionalities like user authentication, product management, and the shopping cart.
+-   **Styling and UI:** Applying Tailwind CSS and shadcn/ui to create a modern and responsive user interface.
+-   **Debugging and Refactoring:** Identifying and fixing bugs, as well as improving code quality and structure.
+
+This project serves as a demonstration of an AI-driven development workflow, where the AI acts as a real-time pair programmer to accelerate the creation of complex web applications.
+
 ## Getting Started
 
 To get a local copy up and running, follow these simple steps.
