@@ -19,16 +19,21 @@ const NavLinks: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
     ? "text-lg font-medium text-gray-700 hover:text-primary-600 w-full text-left p-2 rounded-md hover:bg-gray-100"
     : "text-sm font-medium text-gray-600 hover:text-primary-600";
 
-  const Wrapper = isMobile ? 'div' : React.Fragment;
-  const wrapperProps = isMobile ? { className: "flex flex-col items-start gap-4 w-full" } : {};
+  // This wrapper ensures SheetClose is only used in the mobile context
+  const NavLinkWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    if (isMobile) {
+      return <SheetClose asChild>{children}</SheetClose>;
+    }
+    return <>{children}</>;
+  };
 
   return (
-    <Wrapper {...wrapperProps}>
-      <SheetClose asChild={isMobile}>
+    <div className={isMobile ? "flex flex-col items-start gap-4 w-full" : "flex items-center gap-4"}>
+      <NavLinkWrapper>
         <Link to="/dashboard" className={linkClass}>
           Dashboard
         </Link>
-      </SheetClose>
+      </NavLinkWrapper>
       {isAuthenticated ? (
         <>
           <span className={isMobile ? "text-lg text-gray-700 p-2" : "text-sm text-gray-700"}>
@@ -40,19 +45,19 @@ const NavLinks: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
         </>
       ) : (
         <>
-          <SheetClose asChild={isMobile}>
+          <NavLinkWrapper>
             <Button asChild variant="ghost" size={isMobile ? "lg" : "sm"} className={isMobile ? "w-full justify-start p-2" : ""}>
               <Link to="/login">Login</Link>
             </Button>
-          </SheetClose>
-          <SheetClose asChild={isMobile}>
+          </NavLinkWrapper>
+          <NavLinkWrapper>
             <Button asChild size={isMobile ? "lg" : "sm"} className={isMobile ? "w-full" : ""}>
               <Link to="/register">Register</Link>
             </Button>
-          </SheetClose>
+          </NavLinkWrapper>
         </>
       )}
-    </Wrapper>
+    </div>
   );
 };
 
